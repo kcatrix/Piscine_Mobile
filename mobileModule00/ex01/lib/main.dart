@@ -67,7 +67,9 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+
   void _switchText() {
+    print('Button Pressed');
     if (_text == 'A Simple text') {
       setState(() {
         _text = 'HelloWord';
