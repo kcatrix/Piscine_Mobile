@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Calculatrice'),
     );
   }
 }
@@ -34,6 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _updateDisplay(String value) {
     setState(() {
+      print("button pressed: $value");
       if (_displayValue == '0') {
         _displayValue = value;
       } else {
@@ -62,19 +64,18 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             flex: 1,
             child: Container(
-              color: Colors.blue,
-              alignment: Alignment.topRight,
+              alignment: Alignment.topRight, 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     "0",
-                    style: TextStyle(color: Colors.white, fontSize: 24),
+                    style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 24),
                   ),
                   Text(
                     "0",
-                    style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 36, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -83,8 +84,6 @@ class _MyHomePageState extends State<MyHomePage> {
           // Partie inférieure (calculatrice)
           Expanded(
             flex: 2,
-            child: Container(
-              color: Colors.red,
               child: Column(
                 children: [
                   // Première rangée de boutons
@@ -94,7 +93,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         _buildCalculatorButton('7'),
                         _buildCalculatorButton('8'),
                         _buildCalculatorButton('9'),
-                        _buildCalculatorButton('÷', backgroundColor: const Color.fromARGB(255, 255, 0, 0)),
+                        _buildCalculatorButton('C', foregroundColor: Colors.red),
+                        _buildCalculatorButton('AC', foregroundColor: Colors.red),
+                    
                       ],
                     ),
                   ),
@@ -105,7 +106,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         _buildCalculatorButton('4'),
                         _buildCalculatorButton('5'),
                         _buildCalculatorButton('6'),
-                        _buildCalculatorButton('×', backgroundColor: const Color.fromARGB(255, 255, 0, 0)),
+                        _buildCalculatorButton('+', foregroundColor: Colors.white),
+                        _buildCalculatorButton('-', foregroundColor: Colors.white),
                       ],
                     ),
                   ),
@@ -116,7 +118,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         _buildCalculatorButton('1'),
                         _buildCalculatorButton('2'),
                         _buildCalculatorButton('3'),
-                        _buildCalculatorButton('-', backgroundColor: const Color.fromARGB(255, 255, 0, 0)),
+                        _buildCalculatorButton('x' , foregroundColor: Colors.white),
+                        _buildCalculatorButton('/' , foregroundColor: Colors.white),
+
                       ],
                     ),
                   ),
@@ -124,29 +128,31 @@ class _MyHomePageState extends State<MyHomePage> {
                   Expanded(
                     child: Row(
                       children: [
-                        _buildCalculatorButton('C', onPressed: _clearDisplay, backgroundColor: Colors.grey),
+                        // _buildCalculatorButton('C', onPressed: _clearDisplay, backgroundColor: Colors.grey),
                         _buildCalculatorButton('0'),
-                        _buildCalculatorButton('=', backgroundColor: const Color.fromARGB(255, 255, 0, 0)),
-                        _buildCalculatorButton('+', backgroundColor: const Color.fromARGB(255, 255, 0, 0)),
+                        _buildCalculatorButton('.'),
+                        _buildCalculatorButton('00'),
+                        _buildCalculatorButton('=',  foregroundColor: Colors.white),
+                        // _buildCalculatorButton('+', backgroundColor: const Color.fromARGB(255, 255, 0, 0)),
+                        _buildCalculatorButton(""),
                       ],
                     ),
                   ),
                 ],
               ),
             )
-          )
         ]
       )
     );
   }
 
-  Widget _buildCalculatorButton(String text, {VoidCallback? onPressed, Color backgroundColor = Colors.grey}) {
+  Widget _buildCalculatorButton(String text, {VoidCallback? onPressed, Color foregroundColor = const Color.fromARGB(255, 0, 0, 0)}) {
     return Expanded(
       child: ElevatedButton(
         onPressed: onPressed ?? () => _updateDisplay(text),
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-          foregroundColor: Colors.white,
+          backgroundColor: const Color.fromARGB(255, 99, 98, 98),
+          foregroundColor: foregroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
@@ -154,7 +160,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(fontSize: 24),
+              style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width * 0.05, // 5% de la largeur de l'écran
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1
           ),
         ),
       ),
