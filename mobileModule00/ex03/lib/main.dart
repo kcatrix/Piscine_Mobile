@@ -68,6 +68,7 @@ void calculerExpression() {
     return;
   } //Verifie si l'expression se termine par un chiffre
 
+  
   try {
   Parser p = Parser();
   Expression exp = p.parse(expression);
@@ -121,7 +122,7 @@ void calculerExpression() {
           ),
           // Partie inférieure (calculatrice)
           Expanded(
-            flex: 2,
+            flex: 1,
               child: Column(
                 children: [
                   // Première rangée de boutons

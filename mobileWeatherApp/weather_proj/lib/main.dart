@@ -93,22 +93,20 @@ class _MyHomePageState extends State<MyHomePage> {
     final isSelected = index == _selectedIndex;
     return Expanded(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
             onPressed: () => _onItemTapped(index), // Change de page
             icon: Icon(icon, color: isSelected ? Colors.blue : Colors.black), // Change la couleur si actif
           ),
-        Flexible(
-          child: Text(
+          Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: isSelected ? Colors.blue : Colors.black, // Texte coloré si actif
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
-          ),
-        ), 
+          ), 
         ],
       ),
     );
@@ -192,11 +190,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: BottomAppBar(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-            _buildNavItem(Icons.wb_sunny, "Today", 0),
-            _buildNavItem(Icons.today, "Week", 1),
-            _buildNavItem(Icons.calendar_month, "Month", 2),
+              Expanded(child: _buildNavItem(Icons.wb_sunny, "Today", 0)),
+              Expanded(child: _buildNavItem(Icons.today, "Week", 1)),
+              Expanded(child: _buildNavItem(Icons.calendar_month, "Month", 2)),
             ],
           ),
       ) // This trailing comma makes auto-formatting nicer for build methods.
