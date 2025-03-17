@@ -275,7 +275,10 @@
         String country = geoData['results'][0]['country'] ?? "Pays inconnu";
 
         final String weatherUrl =
-            "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude&current_weather=true&hourly=temperature_2m,weathercode,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Paris";
+            "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude"
+            "&hourly=temperature_2m,weathercode,windspeed_10m"
+            "&daily=temperature_2m_max,temperature_2m_min"
+            "&current_weather=true&timezone=Europe/Paris";
 
         final weatherResponse = await http.get(Uri.parse(weatherUrl));
 
@@ -296,14 +299,14 @@
             // Météo du jour (par heure)
             _hourlyTimes = List<String>.from(weatherData['hourly']['time']);
             _hourlyTemps = List<double>.from(weatherData['hourly']['temperature_2m']);
-            _hourlyWeatherDesc = weatherData['hourly']['weathercode'].map<String>(_getWeatherDescription).toList();
+            _hourlyWeatherDesc = weatherData['hourly']['weathercode']
+                .map<String>((code) => _getWeatherDescription(code))
+                .toList();
             _hourlyWindSpeeds = List<double>.from(weatherData['hourly']['windspeed_10m']);
 
-            // Prévisions sur la semaine
-            _weeklyDates = List<String>.from(weatherData['daily']['time']);
+            // Températures min/max du jour
             _weeklyTempMin = List<double>.from(weatherData['daily']['temperature_2m_min']);
             _weeklyTempMax = List<double>.from(weatherData['daily']['temperature_2m_max']);
-            _weeklyWeatherDesc = weatherData['daily']['weathercode'].map<String>(_getWeatherDescription).toList();
           });
         } else {
           print("Erreur lors de la récupération de la météo: ${weatherResponse.statusCode}");
@@ -437,39 +440,99 @@ String _getWeatherDescription(int code) {
                   ),
                 Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       if (_search != "Geolocation is not available, please enable it in your app settings") ...[
+                        const SizedBox(height: 20),
                         const Text("Today", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                        // Affichage de la localisation complète
                         Text(
-                          _search,
-                          style: _textStyle,
+                          "$_city",
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                         ),
+                        Text(
+                          "$_region, $_country",
+                          style: const TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 20),
                         Expanded(
                           child: ListView.builder(
-                            itemCount: 24, // On affiche les 24 prochaines heures
+                            itemCount: 24,
                             itemBuilder: (context, index) {
-                              // Formatage de l'heure
                               String time = _hourlyTimes.isNotEmpty 
-                                ? DateTime.parse(_hourlyTimes[index]).hour.toString().padLeft(2, '0') + 'h'
+                                ? "${DateTime.parse(_hourlyTimes[index]).hour.toString().padLeft(2, '0')}:00"
                                 : '';
                               
                               return Card(
-                                margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                                child: ListTile(
-                                  leading: Text(time, 
-                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-                                  ),
-                                  title: Text('${_hourlyTemps.isNotEmpty ? _hourlyTemps[index].toString() + '°C' : ''}',
-                                    style: const TextStyle(fontSize: 16)
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(_hourlyWeatherDesc.isNotEmpty ? _hourlyWeatherDesc[index] : ''),
-                                      Text(_hourlyWindSpeeds.isNotEmpty 
-                                        ? 'Vent: ${_hourlyWindSpeeds[index].toString()} km/h' 
-                                        : ''
+                                      // Heure
+                                      SizedBox(
+                                        width: 60,
+                                        child: Text(
+                                          time,
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold
+                                          ),
+                                        ),
+                                      ),
+                                      // Températures
+                                      Container(
+                                        width: 150, // Largeur fixe pour éviter les débordements
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start, // Aligner à gauche
+                                          children: [
+                                            Text(
+                                              _hourlyTemps.isNotEmpty 
+                                                ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
+                                                : "",
+                                              style: const TextStyle(fontSize: 18),
+                                            ),
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min, // Pour que la Row prenne la taille minimale nécessaire
+                                              children: [
+                                                Text(
+                                                  _weeklyTempMin.isNotEmpty
+                                                    ? "Min: ${_weeklyTempMin[0].toStringAsFixed(1)}°C"
+                                                    : "",
+                                                  style: const TextStyle(fontSize: 12, color: Colors.blue),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  _weeklyTempMax.isNotEmpty
+                                                    ? "Max: ${_weeklyTempMax[0].toStringAsFixed(1)}°C"
+                                                    : "",
+                                                  style: const TextStyle(fontSize: 12, color: Colors.red),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      // Description météo
+                                      Expanded(
+                                        child: Text(
+                                          _hourlyWeatherDesc.isNotEmpty 
+                                            ? _hourlyWeatherDesc[index]
+                                            : "",
+                                          style: const TextStyle(fontSize: 16),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      // Vitesse du vent
+                                      SizedBox(
+                                        width: 100,
+                                        child: Text(
+                                          _hourlyWindSpeeds.isNotEmpty 
+                                            ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
+                                            : "",
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -479,8 +542,10 @@ String _getWeatherDescription(int code) {
                           ),
                         ),
                       ] else
-                        Text(_search,
-                        style: TextStyle(color: Color.fromARGB(255, 255, 1, 1))),
+                        Text(
+                          _search,
+                          style: const TextStyle(color: Color.fromARGB(255, 255, 1, 1))
+                        ),
                     ],
                   ),
                 ),
