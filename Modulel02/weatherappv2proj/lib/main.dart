@@ -439,12 +439,48 @@ String _getWeatherDescription(int code) {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      if (_search != "Geolocation is not available, please enable it in your app settings")
+                      if (_search != "Geolocation is not available, please enable it in your app settings") ...[
                         const Text("Today", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                      Text(
-                        _search,
-                        style: _textStyle,
-                      )
+                        Text(
+                          _search,
+                          style: _textStyle,
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: 24, // On affiche les 24 prochaines heures
+                            itemBuilder: (context, index) {
+                              // Formatage de l'heure
+                              String time = _hourlyTimes.isNotEmpty 
+                                ? DateTime.parse(_hourlyTimes[index]).hour.toString().padLeft(2, '0') + 'h'
+                                : '';
+                              
+                              return Card(
+                                margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                child: ListTile(
+                                  leading: Text(time, 
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+                                  ),
+                                  title: Text('${_hourlyTemps.isNotEmpty ? _hourlyTemps[index].toString() + '°C' : ''}',
+                                    style: const TextStyle(fontSize: 16)
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(_hourlyWeatherDesc.isNotEmpty ? _hourlyWeatherDesc[index] : ''),
+                                      Text(_hourlyWindSpeeds.isNotEmpty 
+                                        ? 'Vent: ${_hourlyWindSpeeds[index].toString()} km/h' 
+                                        : ''
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ] else
+                        Text(_search,
+                        style: TextStyle(color: Color.fromARGB(255, 255, 1, 1))),
                     ],
                   ),
                 ),
