@@ -471,68 +471,50 @@ String _getWeatherDescription(int code) {
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       // Heure
-                                      SizedBox(
-                                        width: 60,
-                                        child: Text(
-                                          time,
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold
-                                          ),
+                                      Text(
+                                        time,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold
                                         ),
                                       ),
                                       // Températures
-                                      Container(
-                                        width: 150, // Largeur fixe pour éviter les débordements
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start, // Aligner à gauche
-                                          children: [
-                                            Text(
-                                              _hourlyTemps.isNotEmpty 
-                                                ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
-                                                : "",
-                                              style: const TextStyle(fontSize: 18),
-                                            ),
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min, // Pour que la Row prenne la taille minimale nécessaire
-                                              children: [
-                                                Text(
-                                                  _weeklyTempMin.isNotEmpty
-                                                    ? "Min: ${_weeklyTempMin[0].toStringAsFixed(1)}°C"
-                                                    : "",
-                                                  style: const TextStyle(fontSize: 12, color: Colors.blue),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  _weeklyTempMax.isNotEmpty
-                                                    ? "Max: ${_weeklyTempMax[0].toStringAsFixed(1)}°C"
-                                                    : "",
-                                                  style: const TextStyle(fontSize: 12, color: Colors.red),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            _hourlyTemps.isNotEmpty 
+                                              ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
+                                              : "",
+                                            style: const TextStyle(fontSize: 16),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text(
+                                            _weeklyTempMin.isNotEmpty
+                                              ? "(${_weeklyTempMin[0].toStringAsFixed(1)}°"
+                                              : "",
+                                            style: const TextStyle(fontSize: 14, color: Colors.blue),
+                                          ),
+                                          Text(
+                                            _weeklyTempMax.isNotEmpty
+                                              ? "/${_weeklyTempMax[0].toStringAsFixed(1)}°)"
+                                              : "",
+                                            style: const TextStyle(fontSize: 14, color: Colors.red),
+                                          ),
+                                        ],
                                       ),
                                       // Description météo
-                                      Expanded(
-                                        child: Text(
-                                          _hourlyWeatherDesc.isNotEmpty 
-                                            ? _hourlyWeatherDesc[index]
-                                            : "",
-                                          style: const TextStyle(fontSize: 16),
-                                          textAlign: TextAlign.center,
-                                        ),
+                                      Text(
+                                        _hourlyWeatherDesc.isNotEmpty 
+                                          ? _hourlyWeatherDesc[index]
+                                          : "",
+                                        style: const TextStyle(fontSize: 16),
                                       ),
                                       // Vitesse du vent
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(
-                                          _hourlyWindSpeeds.isNotEmpty 
-                                            ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
-                                            : "",
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
+                                      Text(
+                                        _hourlyWindSpeeds.isNotEmpty 
+                                          ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
+                                          : "",
+                                        style: const TextStyle(fontSize: 16),
                                       ),
                                     ],
                                   ),
