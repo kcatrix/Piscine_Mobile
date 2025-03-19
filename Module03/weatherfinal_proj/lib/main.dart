@@ -326,6 +326,33 @@ import 'dart:convert';
 
 }
 
+IconData _getWeatherIcon(String code) { 
+  Map<String, IconData> weatherIcons = {
+    "Ciel dégagé": Icons.wb_sunny, 
+    "Principalement dégagé": Icons.wb_cloudy, 
+    "Partiellement nuageux": Icons.cloud, 
+    "Nuageux": Icons.cloud_queue, 
+    "Brouillard": Icons.foggy, 
+    "Brouillard givrant": Icons.ac_unit, 
+    "Bruine légère": Icons.grain, 
+    "Bruine modérée": Icons.grain, 
+    "Bruine dense": Icons.grain, 
+    "Pluie légère": Icons.umbrella, 
+    "Pluie modérée": Icons.umbrella, 
+    "Pluie forte": Icons.umbrella, 
+    "Averses légères": Icons.grain, 
+    "Averses modérées": Icons.grain, 
+    "Averses fortes": Icons.grain, 
+    "Orages": Icons.thunderstorm, 
+    "Orages avec grêle légère": Icons.ac_unit, 
+    "Orages avec grêle forte": Icons.ac_unit, 
+    "Météo inconnue": Icons.help_outline,
+  };
+
+  return weatherIcons[code] ?? Icons.help_outline;
+}
+
+
 // Fonction pour convertir le weathercode en description
 String _getWeatherDescription(int code) {
   Map<int, String> weatherDescriptions = {
@@ -425,12 +452,13 @@ String _getWeatherDescription(int code) {
                         if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates") ...[
                           if(_search.isEmpty)
                             const Text("Currently", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                           Text(
+                            "$_city",
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
                           Text(
-                            _search,
-                            style: _textStyle.copyWith(
-                              fontSize: 22, 
-                              color: const Color.fromARGB(255, 22, 5, 52),
-                            ),
+                            "$_region, $_country",
+                            style: const TextStyle(fontSize: 18, color: Color.fromARGB(255, 0, 0, 0)),
                           ),
                           if (_search.isNotEmpty && _search != "Recherche de votre position...") ...[
                             Text(
@@ -449,6 +477,12 @@ String _getWeatherDescription(int code) {
                                 color: Colors.white,
                               ),
                             ),
+                            Icon(
+                              _getWeatherIcon(_currentWeatherDesc),
+                              color: Colors.orange,
+                              size: 40,
+                            ),
+
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
