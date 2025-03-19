@@ -1,5 +1,4 @@
 import 'dart:convert';
-
   import 'package:flutter/material.dart';
   import 'package:location/location.dart';
   import 'package:http/http.dart' as http;
@@ -403,6 +402,12 @@ String _getWeatherDescription(int code) {
         ),
         body: Stack(
           children: [
+            Positioned.fill(
+              child: Image.asset(
+                "assets/background2.jpg",
+                fit: BoxFit.cover,
+              ),
+            ),
             // PageView principal
             PageView(
               controller: _pageController,
@@ -412,41 +417,68 @@ String _getWeatherDescription(int code) {
                   _isShowingSuggestions = false; // Fermer les suggestions lors du changement de page
                 });
               },
-              children: [
+             children: [
                   Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates") ...[ 
-                        const Text("Currently", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                        if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates") ...[
+                          if(_search.isEmpty)
+                            const Text("Currently", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                           Text(
                             _search,
-                            style: _textStyle,
+                            style: _textStyle.copyWith(
+                              fontSize: 22, 
+                              color: const Color.fromARGB(255, 22, 5, 52),
+                            ),
                           ),
                           if (_search.isNotEmpty && _search != "Recherche de votre position...") ...[
                             Text(
-                              "La température actuelle est de $_currentTemp°C",
-                              style: TextStyle(fontSize: 20),
+                              "$_currentTemp°C",
+                              style: TextStyle(
+                                fontSize: 24, 
+                                fontWeight: FontWeight.bold, 
+                                color: const Color.fromARGB(255, 53, 5, 135),
+                              ),
                             ),
                             Text(
-                              "Météo : $_currentWeatherDesc",
-                              style: TextStyle(fontSize: 20),
+                              "$_currentWeatherDesc",
+                              style: TextStyle(
+                                fontSize: 20, 
+                                fontStyle: FontStyle.italic, 
+                                color: Colors.white,
+                              ),
                             ),
-                            Text(
-                              "La vitesse du vent est actuellement de $_currentWindSpeed Km/h",
-                              style: TextStyle(fontSize: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.air, 
+                                  color: Colors.blueAccent, 
+                                  size: 24,
+                                ),
+                                SizedBox(width: 5), // Espace entre l'icône et le texte
+                                Text(
+                                  "$_currentWindSpeed Km/h",
+                                  style: TextStyle(
+                                    fontSize: 20, 
+                                    color: Colors.blueAccent, 
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ]
-                        ]
-                        else
+                        ] else
                           Text(
-                                  _search,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color.fromARGB(255, 255, 1, 1),
-                                  ),
-                                  textAlign: TextAlign.center,)
+                            _search,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 255, 1, 1),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                       ],
                     ),
                   ),
@@ -469,7 +501,7 @@ String _getWeatherDescription(int code) {
                           ),
                           Text(
                             "$_region, $_country",
-                            style: const TextStyle(fontSize: 18, color: Colors.grey),
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
                           ],
