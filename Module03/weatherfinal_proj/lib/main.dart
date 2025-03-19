@@ -480,7 +480,7 @@ String _getWeatherDescription(int code) {
                             ),
                             Icon(
                               _getWeatherIcon(_currentWeatherDesc),
-                              color: Colors.orange,
+                              color:  const Color.fromARGB(255, 53, 5, 135),
                               size: 40,
                             ),
 
@@ -677,9 +677,10 @@ String _getWeatherDescription(int code) {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                    if (_hourlyWeatherDesc.isNotEmpty && index < _hourlyWeatherDesc.length)
                                     Icon(
-                                      _getWeatherIcon(_hourlyWeatherDesc[index]),
-                                      color: Colors.orange,
+                                      _getWeatherIcon(_hourlyWeatherDesc[index]) ?? Icons.help_outline,
+                                      color: const Color.fromARGB(255, 53, 5, 135),
                                       size: 15,
                                     ),
                                     const SizedBox(height: 4),
