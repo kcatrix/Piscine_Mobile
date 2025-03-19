@@ -2,6 +2,7 @@ import 'dart:convert';
   import 'package:flutter/material.dart';
   import 'package:location/location.dart';
   import 'package:http/http.dart' as http;
+  import 'package:fl_chart/fl_chart.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -541,6 +542,117 @@ String _getWeatherDescription(int code) {
                           ],
                           // Liste affichée seulement si `_search` n'est pas vide
                       if (_search.isNotEmpty)
+                      //graphique
+                          // Dans la méthode build, remplacez la partie "LineChart" existante avec ce code:
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(13.0),
+                              child: _hourlyTemps.isNotEmpty
+                                ? LineChart(
+                                    LineChartData(
+                                      gridData: FlGridData(
+                                        show: true,
+                                        drawVerticalLine: true,
+                                        horizontalInterval: 5,
+                                        verticalInterval: 3,
+                                      ),
+                                      titlesData: FlTitlesData(
+                                        show: true,
+                                        rightTitles: AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        topTitles: AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize: 30,
+                                          interval: 3, // Force l'affichage des labels toutes les 3 heures
+                                          getTitlesWidget: (value, meta) {
+                                            if (value % 3 != 0 || value < 0 || value >= _hourlyTimes.length || value.toInt() != value) {
+                                              return const Text('');
+                                            }
+                                            String time = "${DateTime.parse(_hourlyTimes[value.toInt()]).hour.toString().padLeft(2, '0')}:00";
+                                            return Padding(
+                                              padding: const EdgeInsets.only(top: 8.0),
+                                              child: Text(
+                                                time,
+                                                style: const TextStyle(fontSize: 10),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        leftTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            interval: 5,
+                                            getTitlesWidget: (value, meta) {
+                                              return Text(
+                                                '${value.toInt()}°C',
+                                                style: const TextStyle(fontSize: 12),
+                                              );
+                                            },
+                                            reservedSize: 40,
+                                          ),
+                                        ),
+                                      ),
+                                      borderData: FlBorderData(
+                                        show: true,
+                                        border: Border.all(color: const Color(0xff37434d)),
+                                      ),
+                                      minX: 0,
+                                      maxX: 23,
+                                      minY: ( (_hourlyTemps.reduce((min, temp) => temp < min ? temp : min) - 2) ~/ 5) * 5.0,
+                                      maxY: ( (_hourlyTemps.reduce((max, temp) => temp > max ? temp : max) + 2) / 5).ceil() * 5.0,
+                                      lineBarsData: [
+                                        LineChartBarData(
+                                          spots: List.generate(24, (index) {
+                                            return FlSpot(index.toDouble(), _hourlyTemps[index]);
+                                          }),
+                                          isCurved: true,
+                                          color: Colors.blue,
+                                          barWidth: 3,
+                                          isStrokeCapRound: true,
+                                          dotData: FlDotData(
+                                            show: false,
+                                          ),
+                                          belowBarData: BarAreaData(
+                                            show: true,
+                                            color: Colors.blue.withOpacity(0.3),
+                                          ),
+                                        ),
+                                      ],
+                                      lineTouchData: LineTouchData(
+                                        enabled: true,
+                                        touchTooltipData: LineTouchTooltipData(
+                                          fitInsideHorizontally: true,
+                                          fitInsideVertically: true,
+                                          getTooltipItems: (touchedSpots) {
+                                            return touchedSpots.map((LineBarSpot touchedSpot) {
+                                              final int hourIndex = touchedSpot.x.toInt();
+                                              if (hourIndex >= 0 && hourIndex < _hourlyTimes.length) {
+                                                final String time = "${DateTime.parse(_hourlyTimes[hourIndex]).hour}:00";
+                                                return LineTooltipItem(
+                                                  '$time: ${touchedSpot.y.toStringAsFixed(1)}°C',
+                                                  const TextStyle(color: Colors.white),
+                                                );
+                                              } else {
+                                                return null;
+                                              }
+                                            }).toList();
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: Text("Aucune donnée météo disponible"),
+                                  ),
+                            ),
+                          ),
+                          //fin du graphique 
                         Expanded(
                           child: ListView.builder(
                             itemCount: 24,
