@@ -1,4 +1,4 @@
-  import 'dart:convert';
+import 'dart:convert';
 
   import 'package:flutter/material.dart';
   import 'package:location/location.dart';
@@ -275,7 +275,7 @@
         String country = geoData['results'][0]['country'] ?? "Pays inconnu";
 
         final String weatherUrl =
-            "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude"
+            "https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude&daily=weather_code"
             "&hourly=temperature_2m,weathercode,windspeed_10m"
             "&daily=temperature_2m_max,temperature_2m_min"
             "&current_weather=true&timezone=Europe/Paris";
@@ -284,7 +284,6 @@
 
         if (weatherResponse.statusCode == 200) {
           final weatherData = json.decode(weatherResponse.body);
-
           setState(() {
             // Infos de localisation
             _city = city;
@@ -307,6 +306,10 @@
             // Températures min/max du jour
             _weeklyTempMin = List<double>.from(weatherData['daily']['temperature_2m_min']);
             _weeklyTempMax = List<double>.from(weatherData['daily']['temperature_2m_max']);
+            _weeklyDates = List<String>.from(weatherData['daily']['time']);
+            _weeklyWeatherDesc = weatherData['daily']['weather_code']
+                .map<String>((code) => _getWeatherDescription(code))
+                .toList();
           });
         } else {
           print("Erreur lors de la récupération de la météo: ${weatherResponse.statusCode}");
@@ -321,6 +324,7 @@
     print("Erreur lors de la requête : $e");
   }
   setState(() {});
+
 }
 
 // Fonction pour convertir le weathercode en description
@@ -413,140 +417,218 @@ String _getWeatherDescription(int code) {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        if (_search.isNotEmpty && _search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates") ...[ 
+                        if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates") ...[ 
                         const Text("Currently", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                           Text(
                             _search,
                             style: _textStyle,
                           ),
-                          Text(
-                            "La température actuelle est de $_currentTemp°C",
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          Text(
-                            "Météo : $_currentWeatherDesc", // Ajout de la description météo ici
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          Text(
-                            "La vitesse du vent est actuellement de $_currentWindSpeed Km/h",
-                            style: TextStyle(fontSize: 20),
-                          ),
+                          if (_search.isNotEmpty && _search != "Recherche de votre position...") ...[
+                            Text(
+                              "La température actuelle est de $_currentTemp°C",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              "Météo : $_currentWeatherDesc",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              "La vitesse du vent est actuellement de $_currentWindSpeed Km/h",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ]
                         ]
                         else
-                          Text(_search,
-                          style: TextStyle(color: Color.fromARGB(255, 255, 1, 1)))
+                          Text(
+                                  _search,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 255, 1, 1),
+                                  ),
+                                  textAlign: TextAlign.center,)
                       ],
                     ),
                   ),
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      if (_search != "Geolocation is not available, please enable it in your app settings") ...[
-                        const SizedBox(height: 20),
-                        const Text("Today", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                        // Affichage de la localisation complète
-                        Text(
-                          "$_city",
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          "$_region, $_country",
-                          style: const TextStyle(fontSize: 18, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 20),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: 24,
-                            itemBuilder: (context, index) {
-                              String time = _hourlyTimes.isNotEmpty 
-                                ? "${DateTime.parse(_hourlyTimes[index]).hour.toString().padLeft(2, '0')}:00"
-                                : '';
-                              
-                              return Card(
-                                margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // Heure
-                                      Text(
-                                        time,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: _search.isNotEmpty 
+                          ? MainAxisAlignment.start 
+                          : MainAxisAlignment.center, // Centre si pas de recherche
+                      children: <Widget>[
+                        if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates") ...[
+                          const Text(
+                            "Today",
+                            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                          ),
+                          // Affichage de la localisation complète
+                          if (_search.isNotEmpty) ...[
+                          Text(
+                            "$_city",
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "$_region, $_country",
+                            style: const TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 20),
+                          ],
+                          // Liste affichée seulement si `_search` n'est pas vide
+                          if (_search.isNotEmpty)
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: 24,
+                                itemBuilder: (context, index) {
+                                  String time = _hourlyTimes.isNotEmpty 
+                                      ? "${DateTime.parse(_hourlyTimes[index]).hour.toString().padLeft(2, '0')}:00"
+                                      : '';
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        // Heure
+                                        Text(
+                                          time,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
-                                      // Températures
-                                      Row(
-                                        children: [
-                                          Text(
-                                            _hourlyTemps.isNotEmpty 
+                                        // Températures
+                                        Text(
+                                          _hourlyTemps.isNotEmpty
                                               ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
                                               : "",
-                                            style: const TextStyle(fontSize: 16),
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Text(
-                                            _weeklyTempMin.isNotEmpty
-                                              ? "(${_weeklyTempMin[0].toStringAsFixed(1)}°"
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                        // Vitesse du vent
+                                        Text(
+                                          _hourlyWindSpeeds.isNotEmpty
+                                              ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
                                               : "",
-                                            style: const TextStyle(fontSize: 14, color: Colors.blue),
-                                          ),
-                                          Text(
-                                            _weeklyTempMax.isNotEmpty
-                                              ? "/${_weeklyTempMax[0].toStringAsFixed(1)}°)"
-                                              : "",
-                                            style: const TextStyle(fontSize: 14, color: Colors.red),
-                                          ),
-                                        ],
-                                      ),
-                                      // Description météo
-                                      Text(
-                                        _hourlyWeatherDesc.isNotEmpty 
-                                          ? _hourlyWeatherDesc[index]
-                                          : "",
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                      // Vitesse du vent
-                                      Text(
-                                        _hourlyWindSpeeds.isNotEmpty 
-                                          ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
-                                          : "",
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ],
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                      ] else
+                          Expanded( // Ajout d'Expanded ici
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center, // Centre verticalement
+                              crossAxisAlignment: CrossAxisAlignment.center, // Centre horizontalement
+                              children: [
+                                Text(
+                                  _search,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color.fromARGB(255, 255, 1, 1),
                                   ),
-                                ),
-                              );
-                            },
+                                  textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
-                      ] else
-                        Text(
-                          _search,
-                          style: const TextStyle(color: Color.fromARGB(255, 255, 1, 1))
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+            // _weeklyTempMin = List<double>.from(weatherData['daily']['temperature_2m_min']);
+            // _weeklyTempMax = List<double>.from(weatherData['daily']['temperature_2m_max']);
+            // _weeklyDates = List<String>.from(weatherData['daily']['time']);
+            // _weeklyWeatherDesc = weatherData['daily']['weathercode'].map<String>(_getWeatherDescription).toList();
+                           // _weeklyWeatherDesc = weatherData['daily']['weathercode'].map<String>(_getWeatherDescription).toList();
                 Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      if (_search != "Geolocation is not available, please enable it in your app settings")
+                      if (_search.isNotEmpty &&
+                          _search != "Geolocation is not available, please enable it in your app settings" &&
+                          _search != "Could not find any result for the supplied address or cordinates") ...[
                         const Text("Weekly", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                      Text(
-                        _search,
-                        style: _textStyle,
-                      )
+                        Text(
+                          _search,
+                          style: _textStyle,
+                        ),
+                        SizedBox(
+                          height: 300,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: 7,
+                                  itemBuilder: (context, index) => Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            _weeklyDates.isNotEmpty ? _weeklyDates[index] : "",
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            _weeklyTempMin.isNotEmpty ? "${_weeklyTempMin[index].toStringAsFixed(1)}°C" : "",
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            _weeklyTempMax.isNotEmpty ? "${_weeklyTempMax[index].toStringAsFixed(1)}°C" : "",
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            _weeklyWeatherDesc.isNotEmpty ? _weeklyWeatherDesc[index] : "",
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else if (_search == "Geolocation is not available, please enable it in your app settings" || 
+                                _search == "Could not find any result for the supplied address or cordinates") ...[
+                        Expanded( // Ajout d'Expanded ici
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center, // Centre verticalement
+                            crossAxisAlignment: CrossAxisAlignment.center, // Centre horizontalement
+                            children: [
+                              Text(
+                                _search,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromARGB(255, 255, 1, 1),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ] else ...[
+                        const Center(
+                          child: Text(
+                            "Weekly",
+                            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ],
             ),
-            
             // Suggestions (apparaissent au-dessus du contenu principal)
             if (_isShowingSuggestions)
               Positioned(
