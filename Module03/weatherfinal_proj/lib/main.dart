@@ -653,8 +653,10 @@ String _getWeatherDescription(int code) {
                             ),
                           ),
                           //fin du graphique 
-                        Expanded(
+                          SizedBox(
+                          height: 100, // Ajuste la hauteur en fonction du contenu
                           child: ListView.builder(
+                            scrollDirection: Axis.horizontal, // Défilement horizontal
                             itemCount: 24,
                             itemBuilder: (context, index) {
                               String time = _hourlyTimes.isNotEmpty 
@@ -662,56 +664,48 @@ String _getWeatherDescription(int code) {
                                   : '';
 
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center, // Centre horizontalement
-                                  crossAxisAlignment: CrossAxisAlignment.center, // Centre verticalement
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center, // Centre verticalement
+                                  crossAxisAlignment: CrossAxisAlignment.center, // Centre horizontalement
                                   children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        time,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    Text(
+                                      time,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        _hourlyTemps.isNotEmpty
-                                            ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
-                                            : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
+                                    Icon(
+                                      _getWeatherIcon(_hourlyWeatherDesc[index]),
+                                      color: Colors.orange,
+                                      size: 15,
                                     ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        _hourlyWindSpeeds.isNotEmpty
-                                            ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
-                                            : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _hourlyTemps.isNotEmpty
+                                          ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
+                                          : "",
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(fontSize: 12),
                                     ),
-                                    Expanded(
-                                      flex: 2, // Plus d'espace pour la description météo
-                                      child: Text(
-                                        _hourlyWeatherDesc.isNotEmpty ? _hourlyWeatherDesc[index] : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _hourlyWindSpeeds.isNotEmpty
+                                          ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
+                                          : "",
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(fontSize: 12),
                                     ),
+                                    const SizedBox(height: 4),
                                   ],
                                 ),
                               );
                             },
                           ),
                         ),
+
                       ] else
                           Expanded( // Ajout d'Expanded ici
                             child: Column(
