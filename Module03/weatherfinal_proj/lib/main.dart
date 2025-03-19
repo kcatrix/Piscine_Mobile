@@ -1,4 +1,4 @@
- import 'dart:convert';
+import 'dart:convert';
 
   import 'package:flutter/material.dart';
   import 'package:location/location.dart';
@@ -474,66 +474,47 @@ String _getWeatherDescription(int code) {
                           const SizedBox(height: 20),
                           ],
                           // Liste affichée seulement si `_search` n'est pas vide
-                      if (_search.isNotEmpty)
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: 24,
-                            itemBuilder: (context, index) {
-                              String time = _hourlyTimes.isNotEmpty 
-                                  ? "${DateTime.parse(_hourlyTimes[index]).hour.toString().padLeft(2, '0')}:00"
-                                  : '';
-
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center, // Centre horizontalement
-                                  crossAxisAlignment: CrossAxisAlignment.center, // Centre verticalement
-                                  children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        time,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                          if (_search.isNotEmpty)
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: 24,
+                                itemBuilder: (context, index) {
+                                  String time = _hourlyTimes.isNotEmpty 
+                                      ? "${DateTime.parse(_hourlyTimes[index]).hour.toString().padLeft(2, '0')}:00"
+                                      : '';
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        // Heure
+                                        Text(
+                                          time,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                      ),
+                                        // Températures
+                                        Text(
+                                          _hourlyTemps.isNotEmpty
+                                              ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
+                                              : "",
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                        // Vitesse du vent
+                                        Text(
+                                          _hourlyWindSpeeds.isNotEmpty
+                                              ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
+                                              : "",
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ],
                                     ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        _hourlyTemps.isNotEmpty
-                                            ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
-                                            : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        _hourlyWindSpeeds.isNotEmpty
-                                            ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
-                                            : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2, // Plus d'espace pour la description météo
-                                      child: Text(
-                                        _hourlyWeatherDesc.isNotEmpty ? _hourlyWeatherDesc[index] : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                                  );
+                                },
+                              ),
+                            ),
                       ] else
                           Expanded( // Ajout d'Expanded ici
                             child: Column(
