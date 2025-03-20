@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'services/auth_service.dart';
+import 'package:auth0_flutter/auth0_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,63 +11,82 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Diary App',
+      title: 'Flutter Auth0',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const AuthPage(),
+      home: MainView(),
     );
   }
 }
 
-class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
-
+class MainView extends StatefulWidget {
   @override
-  State<AuthPage> createState() => _AuthPageState();
+  State<MainView> createState() => _MainViewState();
 }
 
-class _AuthPageState extends State<AuthPage> {
-  final AuthService authService = AuthService();
-  String? userName;
+class _MainViewState extends State<MainView> {
+  Credentials? _credentials;
+  late Auth0 auth0;
 
-  Future<void> _login() async {
-    final user = await authService.login();
-    if (user != null) {
-      setState(() {
-        userName = user.name;
-      });
-    }
-  }
-
-  Future<void> _logout() async {
-    await authService.logout();
-    setState(() {
-      userName = null;
-    });
+  @override
+  void initState() {
+    super.initState();
+    auth0 = Auth0(
+      'dev-vekudtrpuzp0gs3i.eu.auth0.com', 
+      '1DMEXYmuKMNUkAJM3LvaEygbpFVGNBBw'
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Auth0 Login")),
       body: Center(
-        child: userName == null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: _login,
-                    child: const Text("Se connecter avec Auth0"),
-                  ),
-                ],
+        child: _credentials == null
+            ? ElevatedButton(
+                onPressed: () async {
+                  try {
+                    final credentials = await auth0.webAuthentication().login(
+                      useHTTPS: true,
+                      redirectUrl: "https://dev-vekudtrpuzp0gs3i.eu.auth0.com/android/com.example.diaryapp/callback",
+                    );
+                    setState(() {
+                      _credentials = credentials;
+                    });
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Erreur de connexion: ${e.toString()}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: const Text("Se connecter"),
               )
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Bienvenue, $userName"),
+                  Text("Bienvenue, ${_credentials?.user.name ?? 'Utilisateur'}"),
                   ElevatedButton(
-                    onPressed: _logout,
+                    onPressed: () async {
+                      try {
+                        await auth0.webAuthentication().logout(
+                          useHTTPS: true,
+                          returnTo: "https://dev-vekudtrpuzp0gs3i.eu.auth0.com/android/com.example.diaryapp/callback",
+                        );
+                        setState(() {
+                          _credentials = null;
+                        });
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Erreur de déconnexion: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    },
                     child: const Text("Se déconnecter"),
                   ),
                 ],

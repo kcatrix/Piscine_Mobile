@@ -1,32 +1,34 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("dev.flutter.flutter-gradle-plugin")
+    id("dev.flutter.flutter-gradle-plugin") // Flutter Gradle Plugin après les autres
 }
 
 android {
     namespace = "com.example.diaryapp"
-    compileSdk = 35  // Modification de 34 à 35
-    ndkVersion = "26.1.10909125"  // Dernière version stable du NDK
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     defaultConfig {
         applicationId = "com.example.diaryapp"
-        minSdk = 24
-        targetSdk = 35  // Mettre également à jour targetSdk à 35
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = 21
+        targetSdk = flutter.targetSdkVersion
 
+        // Ajout de Auth0 selon la doc
         manifestPlaceholders["auth0Domain"] = "dev-vekudtrpuzp0gs3i.eu.auth0.com"
         manifestPlaceholders["auth0Scheme"] = "https"
+
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     buildTypes {
