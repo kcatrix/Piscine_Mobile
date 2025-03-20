@@ -1,6 +1,6 @@
 import 'dart:convert';
   import 'package:flutter/material.dart';
-  import 'package:location/location.dart';
+  import 'package:geolocator/geolocator.dart'; // Changed from location to geolocator
   import 'package:http/http.dart' as http;
   import 'package:fl_chart/fl_chart.dart';
 
@@ -39,7 +39,6 @@ import 'dart:convert';
     TextStyle _textStyle = TextStyle(color: const Color.fromARGB(255, 0, 0, 0));
     final TextEditingController _searchController = TextEditingController();
     final PageController _pageController = PageController();
-    final Location location = Location();
           // Infos de localisation
       String _city = "";
       String _region = "";
@@ -145,31 +144,37 @@ import 'dart:convert';
       });
     }
 
-    Future<LocationData> _determinePosition() async {
-      bool serviceEnabled;
-      PermissionStatus permissionGranted;
+ Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
 
-      // Vérifier si le service est activé
-      serviceEnabled = await location.serviceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await location.requestService();
-        if (!serviceEnabled) {
-          return Future.error('Location services are disabled.');
-        }
-      }
-
-      // Vérifier les permissions
-      permissionGranted = await location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) {
-          return Future.error('Location permissions are denied');
-        }
-      }
-
-      // Obtenir la position
-      return await location.getLocation();
+    // Vérifier si le service est activé
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Le service de localisation n'est pas activé
+      return Future.error('Les services de localisation sont désactivés.');
     }
+
+    // Vérifier les permissions
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Les permissions sont refusées
+        return Future.error('Les permissions de localisation sont refusées');
+      }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      // Les permissions sont refusées définitivement
+      return Future.error(
+        'Les permissions de localisation sont définitivement refusées, nous ne pouvons pas demander de permissions.'
+      );
+    } 
+
+    // Obtenir la position
+    return await Geolocator.getCurrentPosition();
+  }
 
     Future<List<Map<String, String>>> searchCities(String query) async {
       if (query.isEmpty) return [];
@@ -229,7 +234,7 @@ import 'dart:convert';
           _isShowingSuggestions = false;
         });
         
-        LocationData position = await _determinePosition();
+        Position position = await _determinePosition();
         String? cityName = await getCityName(position.latitude!, position.longitude!);
         if (cityName != null) {
           final citySuggestions = await searchCities(cityName);
