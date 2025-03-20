@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:location/location.dart';
-import 'package:http/http.dart' as http;
-import 'package:fl_chart/fl_chart.dart';
+  import 'package:flutter/material.dart';
+  import 'package:geolocator/geolocator.dart'; // Changed from location to geolocator
+  import 'package:http/http.dart' as http;
+  import 'package:fl_chart/fl_chart.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +39,6 @@ import 'package:fl_chart/fl_chart.dart';
     TextStyle _textStyle = TextStyle(color: const Color.fromARGB(255, 0, 0, 0));
     final TextEditingController _searchController = TextEditingController();
     final PageController _pageController = PageController();
-    final Location location = Location();
           // Infos de localisation
       String _city = "";
       String _region = "";
@@ -145,31 +144,37 @@ import 'package:fl_chart/fl_chart.dart';
       });
     }
 
-    Future<LocationData> _determinePosition() async {
-      bool serviceEnabled;
-      PermissionStatus permissionGranted;
+ Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
 
-      // Vérifier si le service est activé
-      serviceEnabled = await location.serviceEnabled();
-      if (!serviceEnabled) {
-        serviceEnabled = await location.requestService();
-        if (!serviceEnabled) {
-          return Future.error('Location services are disabled.');
-        }
-      }
-
-      // Vérifier les permissions
-      permissionGranted = await location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) {
-          return Future.error('Location permissions are denied');
-        }
-      }
-
-      // Obtenir la position
-      return await location.getLocation();
+    // Vérifier si le service est activé
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Le service de localisation n'est pas activé
+      return Future.error('Les services de localisation sont désactivés.');
     }
+
+    // Vérifier les permissions
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Les permissions sont refusées
+        return Future.error('Les permissions de localisation sont refusées');
+      }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      // Les permissions sont refusées définitivement
+      return Future.error(
+        'Les permissions de localisation sont définitivement refusées, nous ne pouvons pas demander de permissions.'
+      );
+    } 
+
+    // Obtenir la position
+    return await Geolocator.getCurrentPosition();
+  }
 
     Future<List<Map<String, String>>> searchCities(String query) async {
       if (query.isEmpty) return [];
@@ -229,7 +234,7 @@ import 'package:fl_chart/fl_chart.dart';
           _isShowingSuggestions = false;
         });
         
-        LocationData position = await _determinePosition();
+        Position position = await _determinePosition();
         String? cityName = await getCityName(position.latitude!, position.longitude!);
         if (cityName != null) {
           final citySuggestions = await searchCities(cityName);
@@ -600,7 +605,7 @@ String _getWeatherDescription(int code) {
                             ),
                             Icon(
                               _getWeatherIcon(_currentWeatherDesc),
-                              color: const Color.fromARGB(255, 53, 5, 135),
+                              color:  const Color.fromARGB(255, 53, 5, 135),
                               size: 40,
                             ),
                             Row(
@@ -661,8 +666,121 @@ String _getWeatherDescription(int code) {
                           ],
                           // Liste affichée seulement si `_search` n'est pas vide
                       if (_search.isNotEmpty)
-                        Expanded(
+                      //graphique
+                          // Dans la méthode build, remplacez la partie "LineChart" existante avec ce code:
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(13.0),
+                              child: _hourlyTemps.isNotEmpty
+                                ? LineChart(
+                                    LineChartData(
+                                      gridData: FlGridData(
+                                        show: true,
+                                        drawVerticalLine: true,
+                                        horizontalInterval: 5,
+                                        verticalInterval: 3,
+                                      ),
+                                      titlesData: FlTitlesData(
+                                        show: true,
+                                        rightTitles: AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        topTitles: AxisTitles(
+                                          sideTitles: SideTitles(showTitles: false),
+                                        ),
+                                        bottomTitles: AxisTitles(
+                                        sideTitles: SideTitles(
+                                          showTitles: true,
+                                          reservedSize: 30,
+                                          interval: 3, // Force l'affichage des labels toutes les 3 heures
+                                          getTitlesWidget: (value, meta) {
+                                            if (value % 3 != 0 || value < 0 || value >= _hourlyTimes.length || value.toInt() != value) {
+                                              return const Text('');
+                                            }
+                                            String time = "${DateTime.parse(_hourlyTimes[value.toInt()]).hour.toString().padLeft(2, '0')}:00";
+                                            return Padding(
+                                              padding: const EdgeInsets.only(top: 8.0),
+                                              child: Text(
+                                                time,
+                                                style: const TextStyle(fontSize: 10),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        leftTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            interval: 5,
+                                            getTitlesWidget: (value, meta) {
+                                              return Text(
+                                                '${value.toInt()}°C',
+                                                style: const TextStyle(fontSize: 12),
+                                              );
+                                            },
+                                            reservedSize: 40,
+                                          ),
+                                        ),
+                                      ),
+                                      borderData: FlBorderData(
+                                        show: true,
+                                        border: Border.all(color: const Color(0xff37434d)),
+                                      ),
+                                      minX: 0,
+                                      maxX: 23,
+                                      minY: ( (_hourlyTemps.reduce((min, temp) => temp < min ? temp : min) - 2) ~/ 5) * 5.0,
+                                      maxY: ( (_hourlyTemps.reduce((max, temp) => temp > max ? temp : max) + 2) / 5).ceil() * 5.0,
+                                      lineBarsData: [
+                                        LineChartBarData(
+                                          spots: List.generate(24, (index) {
+                                            return FlSpot(index.toDouble(), _hourlyTemps[index]);
+                                          }),
+                                          isCurved: true,
+                                          color: Colors.blue,
+                                          barWidth: 3,
+                                          isStrokeCapRound: true,
+                                          dotData: FlDotData(
+                                            show: false,
+                                          ),
+                                          belowBarData: BarAreaData(
+                                            show: true,
+                                            color: Colors.blue.withOpacity(0.3),
+                                          ),
+                                        ),
+                                      ],
+                                      lineTouchData: LineTouchData(
+                                        enabled: true,
+                                        touchTooltipData: LineTouchTooltipData(
+                                          fitInsideHorizontally: true,
+                                          fitInsideVertically: true,
+                                          getTooltipItems: (touchedSpots) {
+                                            return touchedSpots.map((LineBarSpot touchedSpot) {
+                                              final int hourIndex = touchedSpot.x.toInt();
+                                              if (hourIndex >= 0 && hourIndex < _hourlyTimes.length) {
+                                                final String time = "${DateTime.parse(_hourlyTimes[hourIndex]).hour}:00";
+                                                return LineTooltipItem(
+                                                  '$time: ${touchedSpot.y.toStringAsFixed(1)}°C',
+                                                  const TextStyle(color: Colors.white),
+                                                );
+                                              } else {
+                                                return null;
+                                              }
+                                            }).toList();
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: Text("Aucune donnée météo disponible"),
+                                  ),
+                            ),
+                          ),
+                          //fin du graphique 
+                          SizedBox(
+                          height: 100, // Ajuste la hauteur en fonction du contenu
                           child: ListView.builder(
+                            scrollDirection: Axis.horizontal, // Défilement horizontal
                             itemCount: 24,
                             itemBuilder: (context, index) {
                               String time = _hourlyTimes.isNotEmpty 
@@ -670,56 +788,49 @@ String _getWeatherDescription(int code) {
                                   : '';
 
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center, // Centre horizontalement
-                                  crossAxisAlignment: CrossAxisAlignment.center, // Centre verticalement
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center, // Centre verticalement
+                                  crossAxisAlignment: CrossAxisAlignment.center, // Centre horizontalement
                                   children: [
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        time,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    Text(
+                                      time,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        _hourlyTemps.isNotEmpty
-                                            ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
-                                            : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
+                                    if (_hourlyWeatherDesc.isNotEmpty && index < _hourlyWeatherDesc.length)
+                                    Icon(
+                                      _getWeatherIcon(_hourlyWeatherDesc[index]) ?? Icons.help_outline,
+                                      color: const Color.fromARGB(255, 53, 5, 135),
+                                      size: 15,
                                     ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Text(
-                                        _hourlyWindSpeeds.isNotEmpty
-                                            ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
-                                            : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _hourlyTemps.isNotEmpty
+                                          ? "${_hourlyTemps[index].toStringAsFixed(1)}°C"
+                                          : "",
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(fontSize: 12),
                                     ),
-                                    Expanded(
-                                      flex: 2, // Plus d'espace pour la description météo
-                                      child: Text(
-                                        _hourlyWeatherDesc.isNotEmpty ? _hourlyWeatherDesc[index] : "",
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(fontSize: 16),
-                                      ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _hourlyWindSpeeds.isNotEmpty
+                                          ? "${_hourlyWindSpeeds[index].toStringAsFixed(1)} km/h"
+                                          : "",
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(fontSize: 12),
                                     ),
+                                    const SizedBox(height: 4),
                                   ],
                                 ),
                               );
                             },
                           ),
                         ),
+
                       ] else
                           Expanded( // Ajout d'Expanded ici
                             child: Column(
