@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.diaryapp"
-    compileSdk = 34
+    compileSdk = 35  // Modification de 34 à 35
     ndkVersion = "26.1.10909125"  // Dernière version stable du NDK
 
     compileOptions {
@@ -21,7 +21,7 @@ android {
     defaultConfig {
         applicationId = "com.example.diaryapp"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35  // Mettre également à jour targetSdk à 35
         versionCode = 1
         versionName = "1.0"
 

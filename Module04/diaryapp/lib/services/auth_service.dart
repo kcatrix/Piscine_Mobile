@@ -10,7 +10,11 @@ class AuthService {
 
   Future<UserProfile?> login() async {
     try {
-      _credentials = await auth0.webAuthentication().login();
+      _credentials = await auth0.webAuthentication(scheme: 'https').login(
+        parameters: {
+          'redirect_uri': 'https://dev-vekudtrpuzp0gs3i.eu.auth0.com/android/com.example.diaryapp/callback'
+        }
+      );
       return _credentials?.user;
     } catch (e) {
       print('Erreur de connexion : $e');
