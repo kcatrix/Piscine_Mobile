@@ -395,7 +395,7 @@ Widget buildWeatherChart(BuildContext context, List<String> dates, List<double> 
                 children: [
                   Text(formatDate(dates[index]), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 5),
-                  Icon(_getWeatherIcon(weatherDesc[index]), size: 30),
+                  Icon(_getWeatherIcon(weatherDesc[index]), size: 30,color: Color.fromARGB(255, 53, 5, 135)),
                   const SizedBox(height: 5),
                   Text("${tempMax[index]}°C max", style: TextStyle(color: Colors.red, fontSize: 12)),
                   const SizedBox(height: 5),
