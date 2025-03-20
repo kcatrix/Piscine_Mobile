@@ -332,78 +332,82 @@ Widget buildWeatherChart(BuildContext context, List<String> dates, List<double> 
   double screenHeight = MediaQuery.of(context).size.height;
 
   return SingleChildScrollView(
-  child: Column(
-    children: [
-      SizedBox(
-        height: screenHeight * 0.3,
-        width: screenWidth * 0.9,
-        child: LineChart(
-          LineChartData(
-            gridData: FlGridData(show: false), 
-            titlesData: FlTitlesData(
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: true, reservedSize: 40),
-              ),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 30,
-                  getTitlesWidget: (value, meta) {
-                    int index = value.toInt();
-                    if (index >= 0 && index < dates.length) {
-                      return Transform.translate(
-                        offset: const Offset(0, 10),
-                        child: Text(
-                          formatDate(dates[index]), 
-                          style: const TextStyle(fontSize: 10),
-                        ),
-                      );
-                    }
-                    return Container();
-                  },
-                  interval: 1,
+    child: Column(
+      children: [
+        SizedBox(
+          height: screenHeight * 0.3,
+          width: screenWidth * 0.9,
+          child: LineChart(
+            LineChartData(
+              gridData: FlGridData(show: false), 
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: true, reservedSize: 40),
                 ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 30,
+                    getTitlesWidget: (value, meta) {
+                      int index = value.toInt();
+                      if (index >= 0 && index < dates.length) {
+                        return Transform.translate(
+                          offset: const Offset(0, 10),
+                          child: Text(
+                            formatDate(dates[index]), 
+                            style: const TextStyle(fontSize: 10),
+                          ),
+                        );
+                      }
+                      return Container();
+                    },
+                    interval: 1,
+                  ),
+                ),
+                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)), 
+                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)), 
               ),
-              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)), 
-              rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)), 
+              borderData: FlBorderData(show: true),
+              lineBarsData: [
+                _buildLine(tempMin, Colors.blue),
+                _buildLine(tempMax, Colors.red),
+              ],
             ),
-            borderData: FlBorderData(show: true),
-            lineBarsData: [
-              _buildLine(tempMin, Colors.blue),
-              _buildLine(tempMax, Colors.red),
-            ],
           ),
         ),
-      ),
-      const SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildLegendItem(Colors.blue, "Temp. Min"),
-          const SizedBox(width: 20),
-          _buildLegendItem(Colors.red, "Temp. Max"),
-        ],
-      ),
-      const SizedBox(height: 10),
-      SingleChildScrollView( // Ajout du scroll horizontal pour la Row
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(dates.length, (index) {
-            return Column(
-              children: [
-                Text(formatDate(dates[index]), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                Icon(_getWeatherIcon(weatherDesc[index]), size: 30),
-                Text("${tempMax[index]}°C max", style: TextStyle(color: Colors.red, fontSize: 12)),
-                Text("${tempMin[index]}°C min", style: TextStyle(color: Colors.blue, fontSize: 12)),
-              ],
-            );
-          }),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildLegendItem(Colors.blue, "Temp. Min"),
+            const SizedBox(width: 20),
+            _buildLegendItem(Colors.red, "Temp. Max"),
+          ],
         ),
-      ),
-    ],
-  ),
-);
+        const SizedBox(height: 10),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Wrap(
+            spacing: 40, 
+            runSpacing: 10,
+            children: List.generate(dates.length, (index) {
+              return Column(
+                children: [
+                  Text(formatDate(dates[index]), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 5),
+                  Icon(_getWeatherIcon(weatherDesc[index]), size: 30),
+                  const SizedBox(height: 5),
+                  Text("${tempMax[index]}°C max", style: TextStyle(color: Colors.red, fontSize: 12)),
+                  const SizedBox(height: 5),
+                  Text("${tempMin[index]}°C min", style: TextStyle(color: Colors.blue, fontSize: 12)),
+                ],
+              );
+            }),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 
@@ -496,6 +500,8 @@ String _getWeatherDescription(int code) {
 
     @override
     Widget build(BuildContext context) {
+      double screenWidth = MediaQuery.of(context).size.width;
+      double screenHeight = MediaQuery.of(context).size.height;
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -740,52 +746,52 @@ String _getWeatherDescription(int code) {
             // _weeklyDates = List<String>.from(weatherData['daily']['time']);
             // _weeklyWeatherDesc = weatherData['daily']['weathercode'].map<String>(_getWeatherDescription).toList();
             // _weeklyWeatherDesc = weatherData['daily']['weathercode'].map<String>(_getWeatherDescription).toList();
-Center(
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      if (_search.isNotEmpty &&
-          _search != "Geolocation is not available, please enable it in your app settings" &&
-          _search != "Could not find any result for the supplied address or cordinates") ...[
-        _search.isEmpty ?
-        const Text( "Weekly", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))
-        :const Text( "Weekly Temperature", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-        Text(
-          _search,
-          style: _textStyle,
-        ),
-        buildWeatherChart(context, _weeklyDates, _weeklyTempMin, _weeklyTempMax, _weeklyWeatherDesc),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  if (_search.isNotEmpty &&
+                      _search != "Geolocation is not available, please enable it in your app settings" &&
+                      _search != "Could not find any result for the supplied address or cordinates") ...[
+                    _search.isEmpty ?
+                    const Text( "Weekly", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold))
+                    :const Text( "Weekly Temperature", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                    Text(
+                      _search,
+                      style: _textStyle,
+                    ),
+                    buildWeatherChart(context, _weeklyDates, _weeklyTempMin, _weeklyTempMax, _weeklyWeatherDesc),
  // Intégration du graphique
-      ] else if (_search == "Geolocation is not available, please enable it in your app settings" || 
-                _search == "Could not find any result for the supplied address or cordinates") ...[
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                _search,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 255, 1, 1),
+                    ] else if (_search == "Geolocation is not available, please enable it in your app settings" || 
+                              _search == "Could not find any result for the supplied address or cordinates") ...[
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              _search,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 255, 1, 1),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ] else ...[
+                      const Center(
+                        child: Text(
+                          "Weekly",
+                          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                        ),
+                      ), 
+                    ],
+                  ],
                 ),
-                textAlign: TextAlign.center,
               ),
-            ],
-          ),
-        ),
-      ] else ...[
-        const Center(
-          child: Text(
-            "Weekly",
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-          ),
-        ), 
-      ],
-    ],
-  ),
-),
              ],
             ),
             // Suggestions (apparaissent au-dessus du contenu principal)
