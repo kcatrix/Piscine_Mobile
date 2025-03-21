@@ -3,6 +3,7 @@ import 'package:auth0_flutter/auth0_flutter_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'services/firestore_service.dart';
 
 import 'constants.dart';
 import 'hero.dart';
@@ -52,6 +53,7 @@ class _ExampleAppState extends State<ExampleApp> {
       setState(() {
         _user = credentials.user;
       });
+      await FirestoreService().saveUser(credentials.user);
     } catch (e) {
       print(e);
     }
