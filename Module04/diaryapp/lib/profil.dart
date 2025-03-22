@@ -87,6 +87,15 @@ class ProfilsWidget extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
 
+                    // 🔹 Barre de séparation verticale
+                    const SizedBox(width: 12),
+                    Container(
+                      height: 50,
+                      width: 2,
+                      color: Colors.grey.shade400,
+                    ),
+                    const SizedBox(width: 12),
+
                     // 📌 Titre et description
                     Expanded(
                       child: Center(
