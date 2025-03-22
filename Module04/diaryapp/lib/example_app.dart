@@ -3,12 +3,12 @@ import 'package:auth0_flutter/auth0_flutter_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:sample/profil.dart';
+import 'package:sample/screen/profile_screen.dart';
 import 'services/firestore_service.dart';
 
 import 'constants.dart';
 import 'hero.dart';
-import 'user.dart';
+import 'screen/user_screen.dart';
 
 class ExampleApp extends StatefulWidget {
   final Auth0? auth0;
