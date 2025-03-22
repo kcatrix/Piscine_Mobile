@@ -11,8 +11,14 @@ class ProfilsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (user == null || user!.nickname == null) {
+      return const Center(child: Text("Utilisateur non connecté"));
+    }
+
+    String userId = user!.nickname!; // 🔥 Utilisation du nickname comme ID utilisateur
+
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _firestoreService.getAllNotes(),
+      future: _firestoreService.getUserNotes(userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -24,7 +30,11 @@ class ProfilsWidget extends StatelessWidget {
         return ListView.builder(
           itemCount: snapshot.data!.length,
           itemBuilder: (context, index) {
-            return NoteCard(note: snapshot.data![index]); // ✅ Utilisation du widget NoteCard
+            var noteData = snapshot.data![index];
+            return NoteCard(
+              noteId: noteData['id'] ?? '', // Assure-toi que Firestore retourne un ID
+              note: noteData,
+            );
           },
         );
       },

@@ -4,59 +4,53 @@ import 'package:auth0_flutter/auth0_flutter.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // 🔹 Enregistre l'utilisateur avec une date
+  // 🔹 Enregistre l'utilisateur avec son nickname comme identifiant unique
   Future<void> saveUser(UserProfile user) async {
-    await _db.collection('notes').doc(user.sub).set({
+    await _db.collection('users').doc(user.nickname).set({
       'name': user.name,
+      'nickname': user.nickname, // Utilisé comme ID unique
       'email': user.email,
       'createdAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
-    print("✅ Utilisateur enregistré : ${user.name}, ${user.email}");
+    print("✅ Utilisateur enregistré : \${user.name} (\${user.nickname})");
   }
 
-  // 🔹 Enregistre une note avec une date
-  Future<void> saveNote(UserProfile user, notes) async {
-    await _db.collection('notes').doc(user.sub).set({
-      'name': user.name,
-      'email': user.email,
+  // 🔹 Enregistre une note en associant le nickname de l'utilisateur
+  Future<void> saveNote(String nickname, String title, String description, String feeling) async {
+    await _db.collection('notes').add({
+      'nickname': nickname, // Stocke le nickname de l'utilisateur
+      'Title': title,
+      'Description': description,
+      'Feeling': feeling,
       'createdAt': FieldValue.serverTimestamp(),
-      'Feeling': notes.Feeling,
-      'Title': notes.title,
-      'Description': notes.description,
-    }, SetOptions(merge: true));
+    });
 
-    print("✅ Note enregistrée pour ${user.name}");
+    print("✅ Note enregistrée pour \${nickname}");
   }
 
-  // 🔹 Récupère toutes les notes en s'assurant que la date existe
-  Future<List<Map<String, dynamic>>> getAllNotes() async {
+  // 🔹 Récupère uniquement les notes d’un utilisateur spécifique
+  Future<List<Map<String, dynamic>>> getUserNotes(String userId) async {
     try {
-      var snapshot = await _db.collection('notes').get();
-      List<Map<String, dynamic>> notes = [];
-
-      for (var doc in snapshot.docs) {
+      var snapshot = await _db.collection('notes').where('Nickname', isEqualTo: userId).get();
+      return snapshot.docs.map((doc) {
         var data = doc.data();
-
-        if (data['createdAt'] == null) {
-          // 🔥 Ajoute une date si absente et attend la mise à jour
-          await _db.collection('notes').doc(doc.id).update({
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-
-          // 🔄 Re-fetch les données après la mise à jour
-          var updatedDoc = await _db.collection('notes').doc(doc.id).get();
-          data = updatedDoc.data()!;
-          print("🕒 Date ajoutée pour la note ${doc.id}");
-        }
-
-        notes.add(data);
-      }
-
-      return notes;
+        data['id'] = doc.id; // ✅ Ajoute l'ID du document dans les données
+        return data;
+      }).toList();
     } catch (e) {
       print("❌ Erreur lors de la récupération des notes : $e");
       return [];
+    }
+  }
+
+  // 🔹 Supprime une note par son ID
+  Future<void> deleteNote(String noteId) async {
+    try {
+      await _db.collection('notes').doc(noteId).delete();
+      print("🗑 Note supprimée : \$noteId");
+    } catch (e) {
+      print("❌ Erreur lors de la suppression de la note : \$e");
     }
   }
 }

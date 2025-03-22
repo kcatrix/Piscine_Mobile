@@ -8,6 +8,7 @@ import 'services/firestore_service.dart';
 import 'constants.dart';
 import 'screen/hero_screen.dart';
 import 'screen/user_screen.dart';
+import 'widgets/add_note_button.dart';
 
 class ExampleApp extends StatefulWidget {
   final Auth0? auth0;
@@ -32,9 +33,11 @@ class _ExampleAppState extends State<ExampleApp> {
         Auth0Web(dotenv.env['AUTH0_DOMAIN']!, dotenv.env['AUTH0_CLIENT_ID']!);
 
     if (kIsWeb) {
-      auth0Web.onLoad().then((final credentials) => setState(() {
-            _user = credentials?.user;
-          }));
+      auth0Web.onLoad().then((final credentials) {
+        setState(() {
+          _user = credentials?.user;
+        });
+      });
     }
   }
 
@@ -46,8 +49,6 @@ class _ExampleAppState extends State<ExampleApp> {
 
       var credentials = await auth0
           .webAuthentication(scheme: dotenv.env['AUTH0_CUSTOM_SCHEME'])
-          // Use a Universal Link callback URL on iOS 17.4+ / macOS 14.4+
-          // useHTTPS is ignored on Android
           .login(useHTTPS: true);
 
       setState(() {
@@ -66,11 +67,9 @@ class _ExampleAppState extends State<ExampleApp> {
       } else {
         await auth0
             .webAuthentication(scheme: dotenv.env['AUTH0_CUSTOM_SCHEME'])
-            // Use a Universal Link logout URL on iOS 17.4+ / macOS 14.4+
-            // useHTTPS is ignored on Android
             .logout(useHTTPS: true);
         setState(() {
-          _user = null;
+          _user = null; // Mettre à jour l'état après déconnexion
         });
       }
     } catch (e) {
@@ -82,39 +81,58 @@ class _ExampleAppState extends State<ExampleApp> {
   Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-          body: Padding(
-        padding: const EdgeInsets.only(
-          top: padding,
-          bottom: padding,
-          left: padding / 2,
-          right: padding / 2,
+        body: Padding(
+          padding: const EdgeInsets.only(
+            top: padding,
+            bottom: padding,
+            left: padding / 2,
+            right: padding / 2,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    _user != null
+                        ? Expanded(child: ProfilsWidget(user: _user)) 
+                        : const Expanded(child: HeroWidget())
+                  ],
+                ),
+              ),
+              _user != null
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: logout,
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.black),
+                          ),
+                          child: const Text('Logout'),
+                        ),
+                        const SizedBox(width: 10), // Espacement entre les boutons
+                        AddNoteButton(
+                          nickname: _user?.nickname ?? "Unknown", // Passer le nickname ici
+                          onNoteAdded: () {
+                            setState(() {}); // Rafraîchir l'écran après l'ajout d'une note
+                          },
+                        ),
+                      ],
+                    )
+                  : ElevatedButton(
+                      onPressed: login,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(Colors.black),
+                      ),
+                      child: const Text('Login'),
+                    ),
+            ],
+          ),
         ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          Expanded(
-              child: Row(children: [
-            _user != null
-                ? Expanded(child: ProfilsWidget(user: _user))   //Expanded(child: UserWidget(user: _user))
-                : const Expanded(child: HeroWidget())
-          ])),
-          _user != null
-              ? ElevatedButton(
-                  onPressed: logout,
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.black),
-                  ),
-                  child: const Text('Logout'),
-                )
-              : ElevatedButton(
-                  onPressed: login,
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.black),
-                  ),
-                  child: const Text('Login'),
-                )
-        ]),
-      )),
+      ),
     );
   }
 }

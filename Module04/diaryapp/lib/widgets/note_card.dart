@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/firestore_service.dart'; // Import du service Firestore
 
 class NoteCard extends StatelessWidget {
+  final String noteId;
   final Map<String, dynamic> note;
+  final FirestoreService _firestoreService = FirestoreService();
 
-  const NoteCard({Key? key, required this.note}) : super(key: key);
+  NoteCard({Key? key, required this.noteId, required this.note}) : super(key: key);
 
   // Fonction pour récupérer l'emoji selon le sentiment
   String getEmoji(String? feeling) {
@@ -25,9 +28,34 @@ class NoteCard extends StatelessWidget {
     }
   }
 
+  // Fonction pour supprimer une note
+  Future<void> _deleteNote(BuildContext context) async {
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Deletion"),
+        content: const Text("Are you sure you want to delete this entry?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmDelete == true) {
+      await _firestoreService.deleteNote(noteId);
+      Navigator.pop(context); // Fermer la boîte de dialogue après suppression
+    }
+  }
+
   // Fonction pour afficher le popup avec les détails de la note
   void _showNoteDetails(BuildContext context) {
-    // ✅ Formatage de la date
     String formattedDate = "Date inconnue";
     if (note['createdAt'] is Timestamp) {
       DateTime date = (note['createdAt'] as Timestamp).toDate();
@@ -69,10 +97,7 @@ class NoteCard extends StatelessWidget {
 
               // ❌ Bouton de suppression
               GestureDetector(
-                onTap: () {
-                  // Requete suppresion db
-                  Navigator.pop(context); // Ferme le popup
-                },
+                onTap: () => _deleteNote(context),
                 child: const Text(
                   "🗑 Delete this entry",
                   style: TextStyle(color: Colors.red, fontSize: 16, fontWeight: FontWeight.bold),
@@ -87,7 +112,6 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Formatage de la date
     String formattedDate = "Date inconnue";
     if (note['createdAt'] is Timestamp) {
       DateTime date = (note['createdAt'] as Timestamp).toDate();
@@ -95,7 +119,7 @@ class NoteCard extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () => _showNoteDetails(context), // 📌 Rend la carte cliquable
+      onTap: () => _showNoteDetails(context),
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         shape: RoundedRectangleBorder(
@@ -107,7 +131,6 @@ class NoteCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 📅 Date et emoji
               Column(
                 children: [
                   Text(
@@ -122,17 +145,9 @@ class NoteCard extends StatelessWidget {
                   Text(getEmoji(note['Feeling']), style: const TextStyle(fontSize: 20)),
                 ],
               ),
-
-              // 🔹 Barre de séparation verticale
               const SizedBox(width: 12),
-              Container(
-                height: 50,
-                width: 2,
-                color: Colors.grey.shade400,
-              ),
+              Container(height: 50, width: 2, color: Colors.grey.shade400),
               const SizedBox(width: 12),
-
-              // 📌 Titre et description
               Expanded(
                 child: Center(
                   child: Text(
