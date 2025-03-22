@@ -3,6 +3,7 @@ import 'package:auth0_flutter/auth0_flutter_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sample/profil.dart';
 import 'services/firestore_service.dart';
 
 import 'constants.dart';
@@ -93,7 +94,7 @@ class _ExampleAppState extends State<ExampleApp> {
           Expanded(
               child: Row(children: [
             _user != null
-                ? Expanded(child: UserWidget(user: _user))
+                ? Expanded(child: ProfilsWidget(user: _user))   //Expanded(child: UserWidget(user: _user))
                 : const Expanded(child: HeroWidget())
           ])),
           _user != null

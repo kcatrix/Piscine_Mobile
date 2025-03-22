@@ -4,43 +4,59 @@ import 'package:auth0_flutter/auth0_flutter.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  // 🔹 Enregistre l'utilisateur avec une date
   Future<void> saveUser(UserProfile user) async {
     await _db.collection('notes').doc(user.sub).set({
       'name': user.name,
       'email': user.email,
-      'createdAt': FieldValue.serverTimestamp(), // Ajout de la date
-    });
+      'createdAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
 
-    print("✅ Utilisateur enregistré dans Firestore : ${user.name}, ${user.email}, ${DateTime.now()}");
+    print("✅ Utilisateur enregistré : ${user.name}, ${user.email}");
   }
 
-  Future<void> saveNote(UserProfile user, notes) async{
+  // 🔹 Enregistre une note avec une date
+  Future<void> saveNote(UserProfile user, notes) async {
     await _db.collection('notes').doc(user.sub).set({
       'name': user.name,
       'email': user.email,
-      'createdAt': FieldValue.serverTimestamp(), // Ajout de la date
-      'Felling' : notes.Feeling,
-      'Title' : notes.title,
-      'Description' : notes.description
-    });
+      'createdAt': FieldValue.serverTimestamp(),
+      'Feeling': notes.Feeling,
+      'Title': notes.title,
+      'Description': notes.description,
+    }, SetOptions(merge: true));
+
+    print("✅ Note enregistrée pour ${user.name}");
   }
 
+  // 🔹 Récupère toutes les notes en s'assurant que la date existe
   Future<List<Map<String, dynamic>>> getAllNotes() async {
-  try {
-    QuerySnapshot querySnapshot = await _db.collection('notes').get();
-    
-    List<Map<String, dynamic>> notes = querySnapshot.docs.map((doc) {
-      return {
-        'id': doc.id,
-        ...doc.data() as Map<String, dynamic>,
-      };
-    }).toList();
+    try {
+      var snapshot = await _db.collection('notes').get();
+      List<Map<String, dynamic>> notes = [];
 
-    return notes;
-    }
-    catch (e) {
-    print("❌ Erreur lors de la récupération des notes : $e");
-    return [];
+      for (var doc in snapshot.docs) {
+        var data = doc.data();
+
+        if (data['createdAt'] == null) {
+          // 🔥 Ajoute une date si absente et attend la mise à jour
+          await _db.collection('notes').doc(doc.id).update({
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+
+          // 🔄 Re-fetch les données après la mise à jour
+          var updatedDoc = await _db.collection('notes').doc(doc.id).get();
+          data = updatedDoc.data()!;
+          print("🕒 Date ajoutée pour la note ${doc.id}");
+        }
+
+        notes.add(data);
+      }
+
+      return notes;
+    } catch (e) {
+      print("❌ Erreur lors de la récupération des notes : $e");
+      return [];
     }
   }
 }

@@ -23,7 +23,7 @@ class UserWidget extends StatelessWidget {
         UserEntryWidget(propertyName: 'Id', propertyValue: user?.sub),
         UserEntryWidget(propertyName: 'Name', propertyValue: user?.name),
         UserEntryWidget(propertyName: 'Email', propertyValue: user?.email),
-        UserEntryWidget(propertyName: 'Tous', propertyValue: user?.toString()),
+        UserEntryWidget(propertyName: 'nickname', propertyValue: user?.nickname),
         UserEntryWidget(
             propertyName: 'Email Verified?',
             propertyValue: user?.isEmailVerified.toString()),
