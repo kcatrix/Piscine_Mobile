@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'constants.dart';
+import '../constants.dart';
 
 final Shader linearGradient = const LinearGradient(colors: <Color>[
   Color.fromRGBO(255, 79, 64, 100),

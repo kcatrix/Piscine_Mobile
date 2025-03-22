@@ -7,7 +7,7 @@ import 'package:sample/screen/profile_screen.dart';
 import 'services/firestore_service.dart';
 
 import 'constants.dart';
-import 'hero.dart';
+import 'screen/hero.dart';
 import 'screen/user_screen.dart';
 
 class ExampleApp extends StatefulWidget {
