@@ -9,6 +9,7 @@ import 'constants.dart';
 import 'screen/hero_screen.dart';
 import 'screen/user_screen.dart';
 import 'widgets/add_note_button.dart';
+import 'screen/calendar_screen.dart';
 
 class ExampleApp extends StatefulWidget {
   final Auth0? auth0;
@@ -20,9 +21,9 @@ class ExampleApp extends StatefulWidget {
 
 class _ExampleAppState extends State<ExampleApp> {
   UserProfile? _user;
-
   late Auth0 auth0;
   late Auth0Web auth0Web;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -69,12 +70,18 @@ class _ExampleAppState extends State<ExampleApp> {
             .webAuthentication(scheme: dotenv.env['AUTH0_CUSTOM_SCHEME'])
             .logout(useHTTPS: true);
         setState(() {
-          _user = null; // Mettre à jour l'état après déconnexion
+          _user = null;
         });
       }
     } catch (e) {
       print(e);
     }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -95,8 +102,12 @@ class _ExampleAppState extends State<ExampleApp> {
                 child: Row(
                   children: [
                     _user != null
-                        ? Expanded(child: ProfilsWidget(user: _user)) 
-                        : const Expanded(child: HeroWidget())
+                        ? Expanded(
+                            child: _selectedIndex == 0
+                                ? ProfilsWidget(user: _user)
+                                : CalendarWidget(user: _user),
+                          )
+                        : const Expanded(child: HeroWidget()),
                   ],
                 ),
               ),
@@ -112,12 +123,12 @@ class _ExampleAppState extends State<ExampleApp> {
                           ),
                           child: const Text('Logout'),
                         ),
-                        const SizedBox(width: 10), // Espacement entre les boutons
+                        const SizedBox(width: 10),
                         AddNoteButton(
-                          nickname: _user?.nickname ?? "Unknown", // Passer le nickname ici
-                          email : _user?.email ?? "Unknown",
+                          nickname: _user?.nickname ?? "Unknown",
+                          email: _user?.email ?? "Unknown",
                           onNoteAdded: () {
-                            setState(() {}); // Rafraîchir l'écran après l'ajout d'une note
+                            setState(() {});
                           },
                         ),
                       ],
@@ -133,6 +144,22 @@ class _ExampleAppState extends State<ExampleApp> {
             ],
           ),
         ),
+        bottomNavigationBar: _user != null
+            ? BottomNavigationBar(
+                currentIndex: _selectedIndex,
+                onTap: _onItemTapped,
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.person),
+                    label: 'Profile',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.calendar_today),
+                    label: 'Calendar',
+                  ),
+                ],
+              )
+            : null,
       ),
     );
   }
