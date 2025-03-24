@@ -88,13 +88,7 @@ class _ExampleAppState extends State<ExampleApp> {
   Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.only(
-            top: padding,
-            bottom: padding / 2,
-            left: padding / 2,
-            right: padding / 2,
-          ),
+        body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
