@@ -91,7 +91,7 @@ class _ExampleAppState extends State<ExampleApp> {
         body: Padding(
           padding: const EdgeInsets.only(
             top: padding,
-            bottom: padding / 4,
+            bottom: padding / 2,
             left: padding / 2,
             right: padding / 2,
           ),
@@ -111,36 +111,66 @@ class _ExampleAppState extends State<ExampleApp> {
                   ],
                 ),
               ),
-              _user != null
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: logout,
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.black),
-                          ),
-                          child: const Text('Logout'),
+              if (_user == null)
+                ElevatedButton(
+                  onPressed: login,
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.black),
+                  ),
+                  child: const Text('Login'),
+                )
+              else if (_selectedIndex == 0)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: logout,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        const SizedBox(width: 40),
-                        AddNoteButton(
-                          nickname: _user?.nickname ?? "Unknown",
-                          email: _user?.email ?? "Unknown",
-                          onNoteAdded: () {
-                            setState(() {});
-                          },
+                        padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05,
+                          vertical: MediaQuery.of(context).size.height * 0.015,
                         ),
-                      ],
-                    )
-                  : ElevatedButton(
-                      onPressed: login,
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.black),
+                        minimumSize: Size(
+                          MediaQuery.of(context).size.width * 0.3,
+                          MediaQuery.of(context).size.height * 0.05,
+                        ),
                       ),
-                      child: const Text('Login'),
+                      child: const Text(
+                        'Logout',
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {});
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05,
+                          vertical: MediaQuery.of(context).size.height * 0.015,
+                        ),
+                        minimumSize: Size(
+                          MediaQuery.of(context).size.width * 0.3,
+                          MediaQuery.of(context).size.height * 0.05,
+                        ),
+                      ),
+                      child: const Text(
+                        "New diary",
+                        style: TextStyle(fontSize: 16),
+                        ),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),
