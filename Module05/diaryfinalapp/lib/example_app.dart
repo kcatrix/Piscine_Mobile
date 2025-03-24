@@ -91,7 +91,7 @@ class _ExampleAppState extends State<ExampleApp> {
         body: Padding(
           padding: const EdgeInsets.only(
             top: padding,
-            bottom: padding,
+            bottom: padding / 6,
             left: padding / 2,
             right: padding / 2,
           ),
@@ -123,7 +123,7 @@ class _ExampleAppState extends State<ExampleApp> {
                           ),
                           child: const Text('Logout'),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 40),
                         AddNoteButton(
                           nickname: _user?.nickname ?? "Unknown",
                           email: _user?.email ?? "Unknown",
