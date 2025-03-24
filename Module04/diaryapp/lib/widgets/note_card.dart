@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/firestore_service.dart'; // Import du service Firestore
+import '../services/firestore_service.dart';
 
-class NoteCard extends StatelessWidget {
+class NoteCard extends StatefulWidget {
   final String noteId;
   final Map<String, dynamic> note;
-  final FirestoreService _firestoreService = FirestoreService();
 
-  NoteCard({Key? key, required this.noteId, required this.note}) : super(key: key);
+  const NoteCard({Key? key, required this.noteId, required this.note}) : super(key: key);
+
+  @override
+  _NoteCardState createState() => _NoteCardState();
+}
+
+class _NoteCardState extends State<NoteCard> {
+  final FirestoreService _firestoreService = FirestoreService();
 
   // Fonction pour récupérer l'emoji selon le sentiment
   String getEmoji(String? feeling) {
@@ -24,7 +30,7 @@ class NoteCard extends StatelessWidget {
       case "excited":
         return "🤩";
       default:
-        return "📝"; // Icône par défaut
+        return "📝";
     }
   }
 
@@ -49,16 +55,19 @@ class NoteCard extends StatelessWidget {
     );
 
     if (confirmDelete == true) {
-      await _firestoreService.deleteNote(noteId);
-      Navigator.pop(context); // Fermer la boîte de dialogue après suppression
+      await _firestoreService.deleteNote(widget.noteId);
+      if (mounted) {
+        setState(() {}); // Rafraîchir l'affichage après suppression
+      }
+      Navigator.pop(context);
     }
   }
 
   // Fonction pour afficher le popup avec les détails de la note
   void _showNoteDetails(BuildContext context) {
     String formattedDate = "Date inconnue";
-    if (note['createdAt'] is Timestamp) {
-      DateTime date = (note['createdAt'] as Timestamp).toDate();
+    if (widget.note['createdAt'] is Timestamp) {
+      DateTime date = (widget.note['createdAt'] as Timestamp).toDate();
       formattedDate = DateFormat('EEEE, MMMM d, yyyy').format(date);
     }
 
@@ -72,30 +81,23 @@ class NoteCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 📅 Date en titre
               Text(
                 formattedDate,
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-
-              // 😊 Sentiment
               Row(
                 children: [
                   const Text("My feeling : ", style: TextStyle(fontSize: 18)),
-                  Text(getEmoji(note['Feeling']), style: const TextStyle(fontSize: 22)),
+                  Text(getEmoji(widget.note['Feeling']), style: const TextStyle(fontSize: 22)),
                 ],
               ),
               const SizedBox(height: 10),
-
-              // 📝 Description de la note
               Text(
-                note['Description'] ?? "Aucune description",
+                widget.note['Description'] ?? "Aucune description",
                 style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
               ),
               const SizedBox(height: 20),
-
-              // ❌ Bouton de suppression
               GestureDetector(
                 onTap: () => _deleteNote(context),
                 child: const Text(
@@ -113,8 +115,8 @@ class NoteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String formattedDate = "Date inconnue";
-    if (note['createdAt'] is Timestamp) {
-      DateTime date = (note['createdAt'] as Timestamp).toDate();
+    if (widget.note['createdAt'] is Timestamp) {
+      DateTime date = (widget.note['createdAt'] as Timestamp).toDate();
       formattedDate = DateFormat('d MMM yyyy').format(date);
     }
 
@@ -134,15 +136,15 @@ class NoteCard extends StatelessWidget {
               Column(
                 children: [
                   Text(
-                    formattedDate.split(" ")[0], // Jour
+                    formattedDate.split(" ")[0],
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    formattedDate.split(" ")[1], // Mois
+                    formattedDate.split(" ")[1],
                     style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
                   ),
                   const SizedBox(height: 5),
-                  Text(getEmoji(note['Feeling']), style: const TextStyle(fontSize: 20)),
+                  Text(getEmoji(widget.note['Feeling']), style: const TextStyle(fontSize: 20)),
                 ],
               ),
               const SizedBox(width: 12),
@@ -151,7 +153,7 @@ class NoteCard extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: Text(
-                    note['Title'] ?? "Sans titre",
+                    widget.note['Title'] ?? "Sans titre",
                     style: const TextStyle(fontSize: 35, fontWeight: FontWeight.w600),
                   ),
                 ),

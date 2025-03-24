@@ -44,6 +44,20 @@ class FirestoreService {
     }
   }
 
+    Stream<List<Map<String, dynamic>>> getUserNotesStream(String userId) {
+    return FirebaseFirestore.instance
+        .collection('notes')
+        .where('Nickname', isEqualTo: userId) // Filtrer par utilisateur
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            var data = doc.data() as Map<String, dynamic>;
+            data['id'] = doc.id; // Ajouter l'ID Firestore à chaque note
+            return data;
+          }).toList();
+        });
+  }
+
   // 🔹 Supprime une note par son ID
   Future<void> deleteNote(String noteId) async {
     try {
