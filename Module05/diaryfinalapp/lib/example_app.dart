@@ -88,13 +88,7 @@ class _ExampleAppState extends State<ExampleApp> {
   Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.only(
-            top: padding,
-            bottom: padding / 4,
-            left: padding / 2,
-            right: padding / 2,
-          ),
+        body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -111,36 +105,50 @@ class _ExampleAppState extends State<ExampleApp> {
                   ],
                 ),
               ),
-              _user != null
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: logout,
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.black),
-                          ),
-                          child: const Text('Logout'),
+              if (_user == null)
+                ElevatedButton(
+                  onPressed: login,
+                  style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.black),
+                  ),
+                  child: const Text('Login'),
+                )
+              else if (_selectedIndex == 0)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: logout,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        const SizedBox(width: 40),
-                        AddNoteButton(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: MediaQuery.of(context).size.width * 0.05,
+                          vertical: MediaQuery.of(context).size.height * 0.015,
+                        ),
+                        minimumSize: Size(
+                          MediaQuery.of(context).size.width * 0.3,
+                          MediaQuery.of(context).size.height * 0.05,
+                        ),
+                      ),
+                      child: const Text(
+                        'Logout',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                    AddNoteButton(
                           nickname: _user?.nickname ?? "Unknown",
                           email: _user?.email ?? "Unknown",
                           onNoteAdded: () {
                             setState(() {});
                           },
-                        ),
-                      ],
-                    )
-                  : ElevatedButton(
-                      onPressed: login,
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.black),
-                      ),
-                      child: const Text('Login'),
                     ),
+                  ],
+                ),
             ],
           ),
         ),
