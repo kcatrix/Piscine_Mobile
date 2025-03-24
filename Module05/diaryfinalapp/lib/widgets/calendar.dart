@@ -11,6 +11,7 @@ class CalendarWidget extends StatefulWidget {
 }
 
 class _CalendarWidgetState extends State<CalendarWidget> {
+  CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
 
@@ -26,10 +27,14 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           _selectedDay = selectedDay;
           _focusedDay = focusedDay;
         });
-
-        widget.onDateSelected(selectedDay); // 🔥 Informe `CalendarScreenWidget`
+        widget.onDateSelected(selectedDay); // Appelle la fonction de rappel avec un seul argument
       },
-      calendarFormat: CalendarFormat.month,
+      calendarFormat: _calendarFormat,
+      onFormatChanged: (format) {
+        setState(() {
+          _calendarFormat = format;
+        });
+      },
     );
   }
 }
