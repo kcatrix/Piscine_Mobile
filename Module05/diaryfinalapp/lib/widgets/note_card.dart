@@ -120,48 +120,64 @@ class _NoteCardState extends State<NoteCard> {
       formattedDate = DateFormat('d MMM yyyy').format(date);
     }
 
-    return GestureDetector(
-      onTap: () => _showNoteDetails(context),
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.green.shade400, width: 2),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+   return GestureDetector(
+  onTap: () => _showNoteDetails(context),
+  child: Card(
+    margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 18),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: BorderSide(color: Colors.green.shade400, width: 2),
+    ),
+    child: Padding(
+      padding: EdgeInsets.only(
+        left: MediaQuery.of(context).size.width * 0.05, // Décalage dynamique (~5% de la largeur)
+        right: 12,
+        top: 8,
+        bottom: 8,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Column(
             children: [
-              Column(
-                children: [
-                  Text(
-                    formattedDate.split(" ")[0],
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    formattedDate.split(" ")[1],
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(getEmoji(widget.note['Feeling']), style: const TextStyle(fontSize: 20)),
-                ],
-              ),
-              const SizedBox(width: 12),
-              Container(height: 50, width: 2, color: Colors.grey.shade400),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    widget.note['Title'] ?? "Sans titre",
-                    style: const TextStyle(fontSize: 35, fontWeight: FontWeight.w600),
-                  ),
+              Text(
+                formattedDate.split(" ")[0],
+                style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width * 0.045, // Taille adaptable
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+              Text(
+                formattedDate.split(" ")[1],
+                style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width * 0.035,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              Text(
+                getEmoji(widget.note['Feeling']),
+                style: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.06),
               ),
             ],
           ),
-        ),
+          SizedBox(width: MediaQuery.of(context).size.width * 0.03), // Espacement dynamique
+          Container(height: 50, width: 2, color: Colors.grey.shade400),
+          SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+            Expanded(
+              child: Center(
+                child: Text(
+                  widget.note['Title'] ?? "Sans titre",
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.06, // Réduction de la taille du texte
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
-    );
+    ),
+  ),
+);
   }
-}
+} 

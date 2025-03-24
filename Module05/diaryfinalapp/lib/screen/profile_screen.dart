@@ -10,7 +10,6 @@ class ProfilsWidget extends StatelessWidget {
 
   ProfilsWidget({required this.user, Key? key}) : super(key: key);
 
-  // 🔥 Associer un emoji à chaque feeling
   String getFeelingEmoji(String feeling) {
     switch (feeling) {
       case "happy":
@@ -24,7 +23,7 @@ class ProfilsWidget extends StatelessWidget {
       case "excited":
         return "🤩";
       default:
-        return "📝"; // Par défaut
+        return "📝";
     }
   }
 
@@ -34,43 +33,38 @@ class ProfilsWidget extends StatelessWidget {
       return const Center(child: Text("Utilisateur non connecté"));
     }
 
-    String userId = user!.nickname!; // Utilisation du nickname comme ID utilisateur
+    String userId = user!.nickname!;
     String profileImageUrl = (user!.pictureUrl ?? 'https://example.com/default-profile-image.png').toString();
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start, // Alignement du contenu à gauche
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 🔹 Affichage de l'image de profil et du nickname
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: NetworkImage(profileImageUrl), // Image de profil
-              ),
-              const SizedBox(width: 16),
-              Text(
-                user!.nickname!,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundImage: NetworkImage(profileImageUrl),
+            ),
+            SizedBox(width: 16),
+            Text(
+              user!.nickname!,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        Align(
+          alignment: Alignment.center,
           child: Text(
             "Your last diary entries",
+            textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
-        // 🔹 Affichage des 2 dernières notes de l'utilisateur
-        Container(
-          height: MediaQuery.of(context).size.height * 0.3, // Limiter la taille
+        Expanded(
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('notes')
-                .where('Nickname', isEqualTo: userId) // Filtrer uniquement les notes de l'utilisateur
+                .where('Nickname', isEqualTo: userId)
                 .orderBy('createdAt', descending: true)
                 .limit(2)
                 .snapshots(),
@@ -100,68 +94,48 @@ class ProfilsWidget extends StatelessWidget {
             },
           ),
         ),
-        // 🔹 Affichage des stats des feelings avec émojis et pourcentage (filtrés par utilisateur)
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Container(
-            width: double.infinity, // Prendre toute la largeur disponible
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
-              children: [
-                StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('notes')
-                      .where('Nickname', isEqualTo: userId) // Filtrer les notes de l'utilisateur
-                      .snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const Center(child: Text("Aucun feeling"));
-                    }
+        Center(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('notes')
+                .where('Nickname', isEqualTo: userId)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text("Aucun"));
+              }
+              var docs = snapshot.data!.docs;
+              int totalNotes = docs.length;
+              Map<String, int> feelingCounts = {};
 
-                    var docs = snapshot.data!.docs;
-                    int totalNotes = docs.length;
-                    Map<String, int> feelingCounts = {};
-
-                    // 🔹 Compter les occurrences des feelings pour l'utilisateur
-                    for (var doc in docs) {
-                      String feeling = doc['Feeling'] ?? 'unknown';
-                      feelingCounts[feeling] = (feelingCounts[feeling] ?? 0) + 1;
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
-                      children: [
-                        Text(
-                          "Total de notes pour $userId : $totalNotes",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        // Affichage des feelings
-                        ...feelingCounts.entries.map((entry) {
-                          // Calculer le pourcentage
-                          double percentage = (entry.value / totalNotes) * 100;
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Container(
-                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9), // Limiter la largeur des items
-                              child: Text(
-                                "${getFeelingEmoji(entry.key)} ${entry.key.capitalize()} : ${entry.value} fois (${percentage.toStringAsFixed(1)}%)",
-                                style: const TextStyle(fontSize: 16),
-                                overflow: TextOverflow.ellipsis, // Éviter le débordement de texte
-                                maxLines: 1, // Limiter à une ligne pour éviter l'overflow
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ],
+              for (var doc in docs) {
+                String feeling = doc['Feeling'] ?? 'unknown';
+                feelingCounts[feeling] = (feelingCounts[feeling] ?? 0) + 1;
+              }
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 8),
+                  Text(
+                    "Nombre total de notes : $totalNotes",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  ...feelingCounts.entries.map((entry) {
+                    double percentage = (entry.value / totalNotes) * 100;
+                    return Text(
+                      "${getFeelingEmoji(entry.key)} ${entry.key.capitalize()} : ${entry.value} fois (${percentage.toStringAsFixed(1)}%)",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 16),
                     );
-                  },
-                ),
-              ],
-            ),
+                  }).toList(),
+                ],
+              );
+            },
           ),
         ),
       ],
