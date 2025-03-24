@@ -140,28 +140,12 @@ class _ExampleAppState extends State<ExampleApp> {
                       ),
                     ),
                     SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {});
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width * 0.05,
-                          vertical: MediaQuery.of(context).size.height * 0.015,
-                        ),
-                        minimumSize: Size(
-                          MediaQuery.of(context).size.width * 0.3,
-                          MediaQuery.of(context).size.height * 0.05,
-                        ),
-                      ),
-                      child: const Text(
-                        "New diary",
-                        style: TextStyle(fontSize: 16),
-                        ),
+                    AddNoteButton(
+                          nickname: _user?.nickname ?? "Unknown",
+                          email: _user?.email ?? "Unknown",
+                          onNoteAdded: () {
+                            setState(() {});
+                          },
                     ),
                   ],
                 ),
