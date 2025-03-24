@@ -4,8 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AddNoteButton extends StatefulWidget {
   final Function() onNoteAdded;
   final String nickname;
+  final String email;
 
-  const AddNoteButton({Key? key, required this.onNoteAdded, required this.nickname}) : super(key: key);
+  const AddNoteButton({Key? key, required this.onNoteAdded, required this.nickname, required this.email}) : super(key: key);
 
   @override
   _AddNoteButtonState createState() => _AddNoteButtonState();
@@ -81,6 +82,7 @@ class _AddNoteButtonState extends State<AddNoteButton> {
                   'Feeling': selectedFeeling,
                   'createdAt': Timestamp.now(),
                   'Nickname': widget.nickname,
+                  'Email' : widget.email,
                 });
 
                 widget.onNoteAdded();

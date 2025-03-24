@@ -115,6 +115,7 @@ class _ExampleAppState extends State<ExampleApp> {
                         const SizedBox(width: 10), // Espacement entre les boutons
                         AddNoteButton(
                           nickname: _user?.nickname ?? "Unknown", // Passer le nickname ici
+                          email : _user?.email ?? "Unknown",
                           onNoteAdded: () {
                             setState(() {}); // Rafraîchir l'écran après l'ajout d'une note
                           },
