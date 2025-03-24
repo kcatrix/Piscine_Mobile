@@ -57,15 +57,16 @@ class ProfilsWidget extends StatelessWidget {
             ],
           ),
         ),
-              Padding(
+        Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-            child: Text(
-              "Your last diary entries",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          child: Text(
+            "Your last diary entries",
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         // 🔹 Affichage des 2 dernières notes de l'utilisateur
-        Expanded(
+        Container(
+          height: MediaQuery.of(context).size.height * 0.3, // Limiter la taille
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('notes')
@@ -102,55 +103,64 @@ class ProfilsWidget extends StatelessWidget {
         // 🔹 Affichage des stats des feelings avec émojis et pourcentage (filtrés par utilisateur)
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Center( // Utilisation de Center pour centrer le contenu
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('notes')
-                  .where('Nickname', isEqualTo: userId) // Filtrer les notes de l'utilisateur
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text("Aucune note"));
-                }
+          child: Container(
+            width: double.infinity, // Prendre toute la largeur disponible
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
+              children: [
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('notes')
+                      .where('Nickname', isEqualTo: userId) // Filtrer les notes de l'utilisateur
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(child: Text("Aucun feeling"));
+                    }
 
-                var docs = snapshot.data!.docs;
-                int totalNotes = docs.length;
-                Map<String, int> feelingCounts = {};
+                    var docs = snapshot.data!.docs;
+                    int totalNotes = docs.length;
+                    Map<String, int> feelingCounts = {};
 
-                // 🔹 Compter les occurrences des feelings pour l'utilisateur
-                for (var doc in docs) {
-                  String feeling = doc['Feeling'] ?? 'unknown';
-                  feelingCounts[feeling] = (feelingCounts[feeling] ?? 0) + 1;
-                }
+                    // 🔹 Compter les occurrences des feelings pour l'utilisateur
+                    for (var doc in docs) {
+                      String feeling = doc['Feeling'] ?? 'unknown';
+                      feelingCounts[feeling] = (feelingCounts[feeling] ?? 0) + 1;
+                    }
 
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,  // Centrer verticalement les enfants
-                  crossAxisAlignment: CrossAxisAlignment.center, // Centrer horizontalement les enfants
-                  children: [
-                    Text(
-                      "Total de notes pour cet utilisateur : $totalNotes",
-                      textAlign: TextAlign.center, // Centrer le texte
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),  // Espacement entre le total et les feelings
-                    ...feelingCounts.entries.map((entry) {
-                      // Calculer le pourcentage
-                      double percentage = (entry.value / totalNotes) * 100;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4.0),
-                        child: Text(
-                          "${getFeelingEmoji(entry.key)} ${entry.key.capitalize()} : ${entry.value} fois (${percentage.toStringAsFixed(1)}%)",
-                          textAlign: TextAlign.center,  // Centrer le texte des feelings
-                          style: const TextStyle(fontSize: 16),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start, // Alignement à gauche
+                      children: [
+                        Text(
+                          "Total de notes pour $userId : $totalNotes",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                      );
-                    }).toList(),
-                  ],
-                );
-              },
+                        const SizedBox(height: 16),
+                        // Affichage des feelings
+                        ...feelingCounts.entries.map((entry) {
+                          // Calculer le pourcentage
+                          double percentage = (entry.value / totalNotes) * 100;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Container(
+                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9), // Limiter la largeur des items
+                              child: Text(
+                                "${getFeelingEmoji(entry.key)} ${entry.key.capitalize()} : ${entry.value} fois (${percentage.toStringAsFixed(1)}%)",
+                                style: const TextStyle(fontSize: 16),
+                                overflow: TextOverflow.ellipsis, // Éviter le débordement de texte
+                                maxLines: 1, // Limiter à une ligne pour éviter l'overflow
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),
