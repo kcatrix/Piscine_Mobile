@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/calendar.dart';
+import 'package:auth0_flutter/auth0_flutter.dart';
 
 class CalendarScreenWidget extends StatefulWidget {
-  const CalendarScreenWidget({Key? key}) : super(key: key);
+  final UserProfile? user;
+
+  const CalendarScreenWidget({required this.user, Key? key}) : super(key: key);
 
   @override
   _CalendarScreenState createState() => _CalendarScreenState();

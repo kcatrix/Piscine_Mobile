@@ -99,7 +99,7 @@ class _ExampleAppState extends State<ExampleApp> {
                         ? Expanded(
                             child: _selectedIndex == 0
                                 ? ProfilsWidget(user: _user)
-                                : CalendarScreenWidget(),
+                                : CalendarScreenWidget(user: _user),
                           )
                         : const Expanded(child: HeroWidget()),
                   ],
