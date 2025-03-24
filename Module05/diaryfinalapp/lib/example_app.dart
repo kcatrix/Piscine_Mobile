@@ -91,7 +91,7 @@ class _ExampleAppState extends State<ExampleApp> {
         body: Padding(
           padding: const EdgeInsets.only(
             top: padding,
-            bottom: padding / 6,
+            bottom: padding / 4,
             left: padding / 2,
             right: padding / 2,
           ),
@@ -105,7 +105,7 @@ class _ExampleAppState extends State<ExampleApp> {
                         ? Expanded(
                             child: _selectedIndex == 0
                                 ? ProfilsWidget(user: _user)
-                                : CalendarWidget(user: _user),
+                                : CalendarScreenWidget(),
                           )
                         : const Expanded(child: HeroWidget()),
                   ],
