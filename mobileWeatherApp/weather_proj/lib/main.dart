@@ -188,15 +188,30 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
       ),
-      bottomNavigationBar: BottomAppBar(
-          child: Row(
-            children: [
-              Expanded(child: _buildNavItem(Icons.wb_sunny, "Today", 0)),
-              Expanded(child: _buildNavItem(Icons.today, "Week", 1)),
-              Expanded(child: _buildNavItem(Icons.calendar_month, "Month", 2)),
-            ],
-          ),
-      ) // This trailing comma makes auto-formatting nicer for build methods.
+      bottomNavigationBar: Container(
+          color: Theme.of(context).colorScheme.inversePrimary,
+          child: BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            selectedItemColor: const Color.fromARGB(255, 2, 88, 247),
+            unselectedItemColor: Colors.white70,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.wb_sunny),
+                label: 'Currently',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.today),
+                label: 'Today',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.calendar_month),
+                label: 'Weekly',
+              ),
+      ]) // This trailing comma makes auto-formatting nicer for build methods.
+      )
     );
   }
 }
