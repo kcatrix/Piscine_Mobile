@@ -196,7 +196,7 @@
           print("Erreur : ${response.statusCode}");
         }
       } catch (e) {
-        print("Erreur lors de la requête : $e");
+        _search = "allo";
       }
 
       return [];
