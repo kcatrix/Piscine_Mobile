@@ -5,11 +5,9 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:auth0_flutter/auth0_flutter.dart';
 
-
 class CalendarScreenWidget extends StatefulWidget {
   final UserProfile? user;
-  CalendarScreenWidget({required this.user, Key? key}) : super(key: key);
-
+  CalendarScreenWidget({required this.user,Key? key}) : super(key: key);
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
 }
@@ -18,7 +16,6 @@ class _CalendarScreenState extends State<CalendarScreenWidget> {
   DateTime _selectedDay = DateTime.now(); // Garde la date sélectionnée
   DateTime _focusedDay = DateTime.now(); // Garde le jour focalisé (utilisé pour le mode semaine/mois)
   CalendarFormat _calendarFormat = CalendarFormat.month; // Format du calendrier (mois, semaine...)
-
   // Calculer la plage de dates en fonction du mode sélectionné (jour, semaine, mois)
   DateTime _getStartOfDay(DateTime date) {
     return DateTime(date.year, date.month, date.day); // 00:00:00
@@ -26,6 +23,12 @@ class _CalendarScreenState extends State<CalendarScreenWidget> {
 
   DateTime _getEndOfDay(DateTime date) {
     return DateTime(date.year, date.month, date.day, 23, 59, 59); // 23:59:59
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    late UserProfile? user = widget.user;
   }
 
   void _onDateSelected(DateTime selectedDay) {
@@ -57,6 +60,7 @@ class _CalendarScreenState extends State<CalendarScreenWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final user = widget.user;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -86,25 +90,13 @@ class _CalendarScreenState extends State<CalendarScreenWidget> {
                       child: StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('notes')
-                            // .where('Nickname', isEqualTo: "userId") // Remplace par la vraie variable userId
-                            // .where('createdAt',
-                            //     isGreaterThanOrEqualTo: Timestamp.fromDate(
-                            //       _calendarFormat == CalendarFormat.month
-                            //           ? _getStartOfMonth(_selectedDay)
-                            //           : (_calendarFormat == CalendarFormat.week
-                            //               ? _getStartOfWeek(_selectedDay)
-                            //               : _getStartOfDay(_selectedDay)),
-                            //     ),
-                            //     isLessThan: Timestamp.fromDate(
-                            //       _calendarFormat == CalendarFormat.month
-                            //           ? _getEndOfMonth(_selectedDay)
-                            //           : (_calendarFormat == CalendarFormat.week
-                            //               ? _getEndOfWeek(_selectedDay)
-                            //               : _getEndOfDay(_selectedDay)),
-                            //     ))
-                            // .orderBy('createdAt', descending: true)
+                            .where('Nickname', isEqualTo: user?.nickname) // Remplace par la vraie variable userId
+                            .where('createdAt',
+                                isGreaterThanOrEqualTo: Timestamp.fromDate(_getStartOfDay(_selectedDay)),
+                                isLessThan: Timestamp.fromDate(_getEndOfDay(_selectedDay)))
+                            .orderBy('createdAt', descending: true)
                             .snapshots(),
-                        builder: (context, snapshot) {
+                          builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Center(child: CircularProgressIndicator());
                           }
@@ -118,7 +110,7 @@ class _CalendarScreenState extends State<CalendarScreenWidget> {
                             itemCount: notes.length,
                             itemBuilder: (context, index) {
                               var note = notes[index].data() as Map<String, dynamic>;
-
+                              print("variable récupérées $note");
                               // Conversion de la date "createdAt" de Timestamp à DateTime
                               String formattedDate = '';
                               if (note['createdAt'] is Timestamp) {
@@ -128,8 +120,8 @@ class _CalendarScreenState extends State<CalendarScreenWidget> {
                               return Card(
                                 margin: EdgeInsets.symmetric(vertical: 8),
                                 child: ListTile(
-                                  title: Text(note['title'] ?? 'Sans titre'),
-                                  subtitle: Text(note['content'] ?? 'Pas de contenu'),
+                                  title: Text(note['Title'] ?? 'Sans titre'),
+                                  subtitle: Text(note['Description'] ?? 'Pas de contenu'),
                                   trailing: Text(
                                     formattedDate, // Affichage de la date formatée
                                     style: TextStyle(fontSize: 12, color: Colors.grey),
