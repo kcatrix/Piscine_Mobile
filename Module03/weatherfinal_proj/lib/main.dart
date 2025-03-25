@@ -3,6 +3,7 @@ import 'dart:convert';
   import 'package:geolocator/geolocator.dart'; // Changed from location to geolocator
   import 'package:http/http.dart' as http;
   import 'package:fl_chart/fl_chart.dart';
+  import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
   void main() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -667,7 +668,7 @@ String _getWeatherDescription(int code) {
                           const SizedBox(height: 20),
                           ],
                           // Liste affichée seulement si `_search` n'est pas vide
-                      if (_search.isNotEmpty)
+                      if (_search.isNotEmpty && MediaQuery.of(context).viewInsets.bottom == 0)
                       //graphique
                           // Dans la méthode build, remplacez la partie "LineChart" existante avec ce code:
                           Expanded(
@@ -873,7 +874,8 @@ String _getWeatherDescription(int code) {
                       _search,
                       style: _textStyle,
                     ),
-                    buildWeatherChart(context, _weeklyDates, _weeklyTempMin, _weeklyTempMax, _weeklyWeatherDesc),
+                    if (MediaQuery.of(context).viewInsets.bottom == 0)
+                      buildWeatherChart(context, _weeklyDates, _weeklyTempMin, _weeklyTempMax, _weeklyWeatherDesc),
  // Intégration du graphique
                     ] else if (_search == "Geolocation is not available, please enable it in your app settings" || 
                               _search == "Could not find any result for the supplied address or cordinates" || _search == "The service connection is lost, please check your internet connection or try again later") ...[
