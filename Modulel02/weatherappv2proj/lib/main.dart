@@ -226,6 +226,7 @@
       try {
         setState(() {
           _search = "Recherche de votre position...";
+          _changeTextStyle(Colors.black);
           _isShowingSuggestions = false;
         });
         
