@@ -24,7 +24,8 @@ class _AddNoteButtonState extends State<AddNoteButton> {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           title: const Text("Add an entry", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          content: StatefulBuilder( // Utilisation de StatefulBuilder pour rafraîchir uniquement l'UI du dialogue
+          content: SingleChildScrollView(
+          child: StatefulBuilder( // Utilisation de StatefulBuilder pour rafraîchir uniquement l'UI du dialogue
             builder: (context, setState) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -66,6 +67,7 @@ class _AddNoteButtonState extends State<AddNoteButton> {
                 ],
               );
             },
+          ),
           ),
           actions: [
             TextButton(
