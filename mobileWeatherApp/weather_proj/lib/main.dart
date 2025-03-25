@@ -159,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text("Today", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                const Text("Currently", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                 Text(_search)
 
               ],
@@ -169,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text("Week", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                const Text("Today", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                 Text(_search)
               ],
             ),
@@ -178,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text("Month", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                const Text("Weekly", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                 Text(_search)
               ],
             ),
