@@ -1,5 +1,4 @@
   import 'dart:convert';
-
   import 'package:flutter/material.dart';
   import 'package:location/location.dart';
   import 'package:http/http.dart' as http;
@@ -196,7 +195,7 @@
           print("Erreur : ${response.statusCode}");
         }
       } catch (e) {
-        _search = "allo";
+        print("Erreur lors de la requête : $e");
       }
 
       return [];
@@ -323,6 +322,7 @@
     }
   } catch (e) {
     print("Erreur lors de la requête : $e");
+    _search = "The service connection is lost, please check your internet connection or try again later";
   }
   setState(() {});
 
@@ -418,7 +418,7 @@ String _getWeatherDescription(int code) {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates") ...[ 
+                        if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates"  && _search != "The service connection is lost, please check your internet connection or try again later") ...[ 
                           const Text("Currently", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                           Text(
                             _search,
@@ -457,7 +457,7 @@ String _getWeatherDescription(int code) {
                           ? MainAxisAlignment.start 
                           : MainAxisAlignment.center, // Centre si pas de recherche
                       children: <Widget>[
-                        if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates") ...[
+                        if (_search != "Geolocation is not available, please enable it in your app settings" && _search != "Could not find any result for the supplied address or cordinates" &&  _search != "The service connection is lost, please check your internet connection or try again later") ...[
                           const Text(
                             "Today",
                             style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
@@ -567,7 +567,7 @@ String _getWeatherDescription(int code) {
                     children: <Widget>[
                       if (_search.isNotEmpty &&
                           _search != "Geolocation is not available, please enable it in your app settings" &&
-                          _search != "Could not find any result for the supplied address or cordinates") ...[
+                          _search != "Could not find any result for the supplied address or cordinates"  && _search != "The service connection is lost, please check your internet connection or try again later") ...[
                         const Text("Weekly", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                         Text(
                           _search,
@@ -618,7 +618,7 @@ String _getWeatherDescription(int code) {
                           ),
                         ),
                       ] else if (_search == "Geolocation is not available, please enable it in your app settings" || 
-                                _search == "Could not find any result for the supplied address or cordinates") ...[
+                                _search == "Could not find any result for the supplied address or cordinates" ||  _search == "The service connection is lost, please check your internet connection or try again later") ...[
                         Expanded( // Ajout d'Expanded ici
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center, // Centre verticalement
