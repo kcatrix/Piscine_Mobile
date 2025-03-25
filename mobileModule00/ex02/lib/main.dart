@@ -35,7 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _updateDisplay(String value) {
     setState(() {
-      print("button pressed: $value");
+      if (value != "")
+        print("button pressed: $value");
       if (_displayValue == '0') {
         _displayValue = value;
       } else {
