@@ -231,6 +231,7 @@ import 'dart:convert';
       try {
         setState(() {
           _search = "Recherche de votre position...";
+          _changeTextStyle(Colors.black);
           _isShowingSuggestions = false;
         });
         
@@ -584,7 +585,7 @@ String _getWeatherDescription(int code) {
                             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                            "$_region, $_country",
+                            "$_region $_country",
                             style: const TextStyle(fontSize: 18, color: Color.fromARGB(255, 0, 0, 0)),
                           ),
                           if (_search.isNotEmpty && _search != "Recherche de votre position...") ...[
