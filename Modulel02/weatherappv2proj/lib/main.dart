@@ -574,7 +574,7 @@ String _getWeatherDescription(int code) {
                           style: _textStyle,
                         ),
                         SizedBox(
-                          height: 300,
+                          height: MediaQuery.of(context).size.height * 0.45,
                           child: Column(
                             children: [
                               Expanded(
