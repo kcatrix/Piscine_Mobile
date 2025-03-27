@@ -162,7 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Text(
             text,
               style: TextStyle(
-              fontSize: MediaQuery.of(context).size.width * 0.05, // 5% de la largeur de l'écran
+              fontSize: MediaQuery.of(context).size.width * 0.04, // 5% de la largeur de l'écran
               fontWeight: FontWeight.bold,
             ),
             maxLines: 1
